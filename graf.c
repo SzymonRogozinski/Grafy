@@ -1,13 +1,6 @@
-#ifndef __GRAPH__
-#define __GRAPH__
+#include <stdio.h>
+#include <stdlib.h>
 
-typedef struct graf {
-	int x; //liczba kolumn
-	int y; //liczba wierszy
-	//int n; Liczba grafów
-	double*** w; //wierzcho³ki
-}GF;
+void wczytaj_graf() {
 
-void wczytaj_graf();
-
-#endif 
+}
