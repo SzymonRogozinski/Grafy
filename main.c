@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             case 's':
                 if (sscanf(optarg, "%d,%d", &st, &sp) != 2)
                 {
-                    fprintf(stderr, "Błędny format wartości argumentu \"-s\" - oczeki   wano \"<st>,<sp>\". Przerywam działanie.\n");
+                    fprintf(stderr, "Błędny format wartości argumentu \"-s\" - oczekiwano \"<st>,<sp>\". Przerywam działanie.\n");
 
                     exit(EXIT_FAILURE);
                 }
