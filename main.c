@@ -134,22 +134,22 @@ int main(int argc, char **argv)
     {
         if (x == -1)
         {
-            printf("Nie podano parametru: liczba kolumn (X). Używam wartości domyślnej X=%d.", DEFAULT_X);
+            printf("Nie podano parametru: liczba kolumn (X). Używam wartości domyślnej X=%d.\n", DEFAULT_X);
             x = DEFAULT_X;
         }
         if (y == -1)
         {
-            printf("Nie podano parametru: liczba wierszy (Y). Używam wartości domyślnej Y=%d.", DEFAULT_Y);
+            printf("Nie podano parametru: liczba wierszy (Y). Używam wartości domyślnej Y=%d.\n", DEFAULT_Y);
             y = DEFAULT_Y;
         }
         if (n == -1)
         {
-            printf("Nie podano parametru: liczba spójnych grafów (N). Używam wartości domyślnej N=%d.", DEFAULT_N);
+            printf("Nie podano parametru: liczba spójnych grafów (N). Używam wartości domyślnej N=%d.\n", DEFAULT_N);
             n = DEFAULT_N;
         }
         if (min == -1 || max == -1)
         {
-            printf("Nie podano parametru: zakres wartości wag (MIN-MAX). Używam wartości domyślnej MIN=%d, MAX=%d.", DEFAULT_MIN, DEFAULT_MAX);
+            printf("Nie podano parametru: zakres wartości wag (MIN-MAX). Używam wartości domyślnej MIN=%d, MAX=%d.\n", DEFAULT_MIN, DEFAULT_MAX);
             min = DEFAULT_MIN;
             max = DEFAULT_MAX;
         }
