@@ -4,50 +4,69 @@
 
 #include "graf.h"
 
+#define max_lenght 128
+
 int wczytaj_graf(FILE * F, GraF* gp) {
 	int a, b;
-	char* buf = malloc(32*sizeof(buf)); //Bufor
-	char c; //wczytywanie znaków
-	double g; //Przerzut na double
-	int len = 0; //D³ugoœæ buforu
+	char* buf = malloc(max_lenght*sizeof(buf)); //Bufor
+	double l,w,r,y; //Zmienne do wczytywania double
+	int g, q, e, t;
+	int edge = 0; //Liczba wczytanych danych
 	int i = 0; //Ile wierzcho³ków wczytano
-	if (fscanf(F,"%d %d", &a, &b) != 2)
+	if (fscanf(F,"%d %d\n", &a, &b) != 2)
 		return 1;
 	//Wczytywanie wymiarów
 	gp->x = b;
 	gp->y = a;
-	//alokowanie pamiêci
-	gp->w = malloc(a*b*sizeof(gp->w));
-	gp->w[0] = malloc(9 * sizeof(gp->w[0]));
-	//Wczytanie pierwszego elementu, robiê poza pêtl¹, przez pocz¹tkowe znaki bia³e
-	if(fscanf(F,"%lf",&g)!=1)
-		return 1;
-	gp->w[0] = &g;
-	printf("%lf\n", gp->w[0][0]);
-	gp->w[0]++;
-
-	while((c=fgetc(F))!= EOF) {
-		if (isalnum(c) || c == '.') { //Wczytuje liczbê do bufora
-			*(buf + len) = c;
-			len++;
+	//alokowanie pamiêci, rzutuje na typ, bo wczeœniej nie dzia³a³o XD
+	gp->w = malloc(a*b*sizeof(double*));
+	while (fgets(buf,max_lenght,F)!=NULL && i<a*b) {
+		if((gp->w[i] = malloc(9*sizeof(double)))==NULL) //Sprawdzanie czy otrzymano wskaŸnik
+			return 1;
+		if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r, &t, &y) == 8) { //Podano 4 pary
+			gp->w[i][0] = g;
+			gp->w[i][1] = l;
+			gp->w[i][2] = q;
+			gp->w[i][3] = w;
+			gp->w[i][4] = e;
+			gp->w[i][5] = r;
+			gp->w[i][6] = t;
+			gp->w[i][7] = y;
+			gp->w[i][8] = -1;
+			edge = 9;
 		}
-		else if (c == '\n') { //Zwiêksza index wierzcho³ka i oznacza koniec jako -1
-			g=-1;
-			gp->w[i] = &g;
-			i++;
+		else if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r) == 6) { //Podano 3 pary
+			gp->w[i][0] = g;
+			gp->w[i][1] = l;
+			gp->w[i][2] = q;
+			gp->w[i][3] = w;
+			gp->w[i][4] = e;
+			gp->w[i][5] = r;
+			gp->w[i][6] = -1;
+			edge = 7;
 		}
-		else if(len!=0) { //Dodaje liczbê do w
-			*(buf + len) = '\0';
-			g= atof(buf);
-			gp->w[i] = &g;
-			printf("%lf\n", gp->w[i][0]);
-			gp->w[i]++;
-			len = 0;
+		else if (sscanf(buf, "%d :%lf  %d :%lf", &g, &l, &q, &w) == 4) { //Podano 2 pary
+			gp->w[i][0] = g;
+			gp->w[i][1] = l;
+			gp->w[i][2] = q;
+			gp->w[i][3] = w;
+			gp->w[i][4] = -1;
+			edge = 5;
 		}
-
+		else if (sscanf(buf, "%d :%lf", &g, &l) == 2) { //Podano 1 parê
+			gp->w[i][0] = g;
+			gp->w[i][1] = l;
+			gp->w[i][2] = -1;
+			edge = 3;
+		}
+		else //Brak danych lub niepoprawny format
+			return 1;
+		if ((gp->w[i]=(double*)realloc(gp->w[i], (edge) * sizeof(double)))==NULL) //Obciêcie pamiêci
+			return 1;
+		i++;
 	}
-
-
-
+	if (i < a * b) //Wymiar jest wiêkszy ni¿ liczba wierzcho³ków
+		return 1;
+	free(buf);
 	return 0;
 }
