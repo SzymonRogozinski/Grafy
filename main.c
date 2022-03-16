@@ -24,24 +24,21 @@ int main(int argc, char **argv)
     int st = -1;
     int sp = -1; // TODO: zmienić te wartości na strukturę jak już będzie
 
-    while ((opt = getopt(argc, argv, "s:x:y:n:r:f:o:")))
+    while ((opt = getopt(argc, argv, "s:x:y:n:r:f:o:")) != -1)
     {
         switch (opt)
         {
             case 's':
                 if (sscanf(optarg, "%d,%d", &st, &sp) != 2)
                 {
-                    fprintf(stderr,
-                            "Błędny format wartości argumentu \"-s\" - oczeki   wano \"<st>,<sp>\". Przerywam działanie.\n");
+                    fprintf(stderr, "Błędny format wartości argumentu \"-s\" - oczeki   wano \"<st>,<sp>\". Przerywam działanie.\n");
 
                     exit(EXIT_FAILURE);
                 }
 
                 if (st < 0 || sp < 0)
                 {
-                    fprintf(stderr,
-                            "Indeksy wierzchołków nie mogą być ujemne - wczytano “%d,%d”. Przerywam działanie.\n", st,
-                            sp);
+                    fprintf(stderr, "Indeksy wierzchołków nie mogą być ujemne - wczytano “%d,%d”. Przerywam działanie.\n", st, sp);
 
                     exit(EXIT_FAILURE);
                 }
@@ -52,8 +49,7 @@ int main(int argc, char **argv)
 
                 if (sscanf(optarg, "%d-%d", &min, &max) != 2)
                 {
-                    fprintf(stderr,
-                            "Błędny format wartości argumentu \"-r\" - oczekiwano \"<min>-<max>\". Przerywam działanie.\n");
+                    fprintf(stderr, "Błędny format wartości argumentu \"-r\" - oczekiwano \"<min>-<max>\". Przerywam działanie.\n");
 
                     exit(EXIT_FAILURE);
                 }
@@ -71,8 +67,7 @@ int main(int argc, char **argv)
 
                 if (x <= 0)
                 {
-                    fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.",
-                            atoi(optarg));
+                    fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
                     exit(EXIT_FAILURE);
                 }
 
@@ -83,8 +78,7 @@ int main(int argc, char **argv)
 
                 if (y <= 0)
                 {
-                    fprintf(stderr, "Liczba wierszy musi być większa od zera – wczytano “%d”. Przerywam działanie.",
-                            atoi(optarg));
+                    fprintf(stderr, "Liczba wierszy musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
                     exit(EXIT_FAILURE);
                 }
 
@@ -95,9 +89,7 @@ int main(int argc, char **argv)
 
                 if (n <= 0)
                 {
-                    fprintf(stderr,
-                            "Liczba spójnych grafów musi być większa od zera – wczytano “%d”. Przerywam działanie.",
-                            atoi(optarg));
+                    fprintf(stderr, "Liczba spójnych grafów musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
                     exit(EXIT_FAILURE);
                 }
 
@@ -109,7 +101,7 @@ int main(int argc, char **argv)
                 out = optarg;
                 break;
             default:
-                fprintf(stderr, "Wykryto błędny parametr w argumentach wywołania. Przerywam działanie.");
+                fprintf(stderr, "Wykryto błędny parametr w argumentach wywołania. Przerywam działanie.\n");
                 exit(EXIT_FAILURE);
         }
     }
@@ -123,8 +115,7 @@ int main(int argc, char **argv)
 
     if (st == -1 || sp == -1)
     {
-        fprintf(stderr,
-                "Nie zdefiniowano wierzchołków, między którymi miałaby zostać wyznaczona droga. Przerywam działanie.\n");
+        fprintf(stderr, "Nie zdefiniowano wierzchołków, między którymi miałaby zostać wyznaczona droga. Przerywam działanie.\n");
 
         exit(EXIT_FAILURE);
     }
@@ -158,8 +149,7 @@ int main(int argc, char **argv)
         }
         if (min == -1 || max == -1)
         {
-            printf("Nie podano parametru: zakres wartości wag (MIN-MAX). Używam wartości domyślnej MIN=%d, MAX=%d.",
-                   DEFAULT_MIN, DEFAULT_MAX);
+            printf("Nie podano parametru: zakres wartości wag (MIN-MAX). Używam wartości domyślnej MIN=%d, MAX=%d.", DEFAULT_MIN, DEFAULT_MAX);
             min = DEFAULT_MIN;
             max = DEFAULT_MAX;
         }
@@ -180,8 +170,7 @@ int main(int argc, char **argv)
 
     if (st >= x * y || sp >= x * y) // wierzchołek ST/SP poza dostępnym zakresem
     {
-        fprintf(stderr, "Indeksy wierzchołków ST=%d, SP=%d nie należą do zakresu <0;%d>. Przerywam działanie.\n", st,
-                sp, x * y - 1);
+        fprintf(stderr, "Indeksy wierzchołków ST=%d, SP=%d nie należą do zakresu <0;%d>. Przerywam działanie.\n", st, sp, x * y - 1);
 
         exit(EXIT_FAILURE);
     }
