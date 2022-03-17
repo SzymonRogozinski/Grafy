@@ -6,6 +6,7 @@
 
 #define max_lenght 128
 
+//Funkcja wczytuje graf do struktury
 int wczytaj_graf(FILE * F, GraF* gp) {
 	int a, b;
 	char* buf = malloc(max_lenght*sizeof(buf)); //Bufor
@@ -69,4 +70,27 @@ int wczytaj_graf(FILE * F, GraF* gp) {
 		return 1;
 	free(buf);
 	return 0;
+}
+//Funkcja zapisuje graf do pliku
+void zapisz_graf(FILE *F, GraF *gp) {
+	int n =(gp->x)*(gp->y); //Liczba wierzcho³ków
+	int j;
+	fprintf(F,"%d %d\n",gp->x,gp->y);
+	for (int i = 0; i < n; i++) {
+		j = 0;
+		fprintf(F,"\t ");
+		while (gp->w[i][j] != -1) {
+			fprintf(F,"%d :%lf ", (int)gp->w[i][j], gp->w[i][j + 1]);
+			j += 2;
+		}
+		fprintf(F,"\n");
+	}
+}
+
+//Funkcja zwalniaj¹ca graf
+void free_graf(GraF* gp) {
+	int n = (gp->x) * (gp->y);
+	for (int i = 0; i < n; i++)
+		free(gp->w[i]);
+	free(gp->w);
 }

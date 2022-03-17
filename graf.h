@@ -6,9 +6,11 @@ typedef struct graf {
 	int x; //liczba kolumn
 	int y; //liczba wierszy
 	//int n; Liczba grafów
-	double*** w; //wierzcho³ki
+	double** w; //wierzcho³ki
 }GraF;
 
 int wczytaj_graf(FILE *, GraF*);
+void zapisz_graf(FILE*,GraF*);
+void free_graf(GraF*);
 
 #endif 
