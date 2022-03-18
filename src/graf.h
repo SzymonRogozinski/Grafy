@@ -12,6 +12,6 @@ typedef struct Graf
 
 int wczytaj_graf(FILE *, graph_t *); // wczytuje graf z pliku
 void zapisz_graf(FILE *, graph_t *); // zapisuje graf do pliku
-void free_graf(graph_t *);			 // zwalnia pamięć po strukturach grafu
+void zwolnij_graf(graph_t *);		 // zwalnia pamięć po strukturach grafu
 
 #endif

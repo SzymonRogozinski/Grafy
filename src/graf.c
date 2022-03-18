@@ -99,7 +99,7 @@ void zapisz_graf(FILE *ouf, graph_t *gp)
 	}
 }
 
-void free_graf(graph_t *gp)
+void zwolnij_graf(graph_t *gp)
 {
 	int n = (gp->x) * (gp->y); // liczba wierzchołków
 
