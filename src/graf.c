@@ -4,13 +4,13 @@
 
 #include "graf.h"
 
-#define max_lenght 128
+#define MAX_LENGTH 128
 
 // Funkcja wczytuje graf do struktury
 int wczytaj_graf(FILE *F, graph_t *gp)
 {
 	int a, b;
-	char *buf = malloc(max_lenght * sizeof(buf)); // Bufor
+	char *buf = malloc(MAX_LENGTH * sizeof(buf)); // Bufor
 	double l, w, r, y;							  // Zmienne do wczytywania double
 	int g, q, e, t;
 	int edge = 0; // Liczba wczytanych danych
@@ -22,7 +22,7 @@ int wczytaj_graf(FILE *F, graph_t *gp)
 	gp->y = a;
 	// alokowanie pami�ci, rzutuje na typ, bo wcze�niej nie dzia�a�o XD
 	gp->w = malloc(a * b * sizeof(double *));
-	while (fgets(buf, max_lenght, F) != NULL && i < a * b)
+	while (fgets(buf, MAX_LENGTH, F) != NULL && i < a * b)
 	{
 		if ((gp->w[i] = malloc(9 * sizeof(double))) == NULL) // Sprawdzanie czy otrzymano wska�nik
 			return 1;
@@ -77,22 +77,26 @@ int wczytaj_graf(FILE *F, graph_t *gp)
 	free(buf);
 	return 0;
 }
-// Funkcja zapisuje graf do pliku
-void zapisz_graf(FILE *F, graph_t *gp)
+
+void zapisz_graf(FILE *ouf, graph_t *gp)
 {
-	int n = (gp->x) * (gp->y); // Liczba wierzcho�k�w
-	int j;
-	fprintf(F, "%d %d\n", gp->x, gp->y);
+	int n = (gp->x) * (gp->y); // liczba wierzchołków
+
+	fprintf(ouf, "%d %d\n", gp->y, gp->x);
+
 	for (int i = 0; i < n; i++)
 	{
-		j = 0;
-		fprintf(F, "\t ");
-		while (gp->w[i][j] != -1)
+		fprintf(ouf, "\t ");
+
+		for (int j = 0; j < 8; j += 2) // max zakres indeksów to 0-7
 		{
-			fprintf(F, "%d :%lf ", (int)gp->w[i][j], gp->w[i][j + 1]);
-			j += 2;
+			if (gp->w[i][j] == -1) // przerywa pętlę, jeżeli nie ma następnego sąsiada
+				break;
+
+			fprintf(ouf, "%d :%lf  ", (int)gp->w[i][j], gp->w[i][j + 1]);
 		}
-		fprintf(F, "\n");
+
+		fprintf(ouf, "\n");
 	}
 }
 
