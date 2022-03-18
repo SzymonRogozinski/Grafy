@@ -3,12 +3,17 @@
 
 #include "graf.h"
 
-int main() {
-	FILE* F = fopen("mygraph","r"); //Testowy plik, do sprawdzania, czy dzia≥a wczytywanie
+int main()
+{
+	FILE *F = fopen("mygraph", "r"); // testowy plik do sprawdzania, czy dzia≈Ça wczytywanie
+
 	if (F == NULL)
 		return 1;
-	GraF* G = malloc(sizeof(GraF));
-	if(wczytaj_graf(F,G)==1)
+
+	graph_t *G = malloc(sizeof *G);
+
+	if (wczytaj_graf(F, G) == 1)
 		return 1;
+
 	return 0;
 }

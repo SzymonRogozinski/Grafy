@@ -6,25 +6,28 @@
 
 #define max_lenght 128
 
-//Funkcja wczytuje graf do struktury
-int wczytaj_graf(FILE * F, GraF* gp) {
+// Funkcja wczytuje graf do struktury
+int wczytaj_graf(FILE *F, graph_t *gp)
+{
 	int a, b;
-	char* buf = malloc(max_lenght*sizeof(buf)); //Bufor
-	double l,w,r,y; //Zmienne do wczytywania double
+	char *buf = malloc(max_lenght * sizeof(buf)); // Bufor
+	double l, w, r, y;							  // Zmienne do wczytywania double
 	int g, q, e, t;
-	int edge = 0; //Liczba wczytanych danych
-	int i = 0; //Ile wierzcho³ków wczytano
-	if (fscanf(F,"%d %d\n", &a, &b) != 2)
+	int edge = 0; // Liczba wczytanych danych
+	int i = 0;	  // Ile wierzchoï¿½kï¿½w wczytano
+	if (fscanf(F, "%d %d\n", &a, &b) != 2)
 		return 1;
-	//Wczytywanie wymiarów
+	// Wczytywanie wymiarï¿½w
 	gp->x = b;
 	gp->y = a;
-	//alokowanie pamiêci, rzutuje na typ, bo wczeœniej nie dzia³a³o XD
-	gp->w = malloc(a*b*sizeof(double*));
-	while (fgets(buf,max_lenght,F)!=NULL && i<a*b) {
-		if((gp->w[i] = malloc(9*sizeof(double)))==NULL) //Sprawdzanie czy otrzymano wskaŸnik
+	// alokowanie pamiï¿½ci, rzutuje na typ, bo wczeï¿½niej nie dziaï¿½aï¿½o XD
+	gp->w = malloc(a * b * sizeof(double *));
+	while (fgets(buf, max_lenght, F) != NULL && i < a * b)
+	{
+		if ((gp->w[i] = malloc(9 * sizeof(double))) == NULL) // Sprawdzanie czy otrzymano wskaï¿½nik
 			return 1;
-		if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r, &t, &y) == 8) { //Podano 4 pary
+		if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r, &t, &y) == 8)
+		{ // Podano 4 pary
 			gp->w[i][0] = g;
 			gp->w[i][1] = l;
 			gp->w[i][2] = q;
@@ -36,7 +39,8 @@ int wczytaj_graf(FILE * F, GraF* gp) {
 			gp->w[i][8] = -1;
 			edge = 9;
 		}
-		else if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r) == 6) { //Podano 3 pary
+		else if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r) == 6)
+		{ // Podano 3 pary
 			gp->w[i][0] = g;
 			gp->w[i][1] = l;
 			gp->w[i][2] = q;
@@ -46,7 +50,8 @@ int wczytaj_graf(FILE * F, GraF* gp) {
 			gp->w[i][6] = -1;
 			edge = 7;
 		}
-		else if (sscanf(buf, "%d :%lf  %d :%lf", &g, &l, &q, &w) == 4) { //Podano 2 pary
+		else if (sscanf(buf, "%d :%lf  %d :%lf", &g, &l, &q, &w) == 4)
+		{ // Podano 2 pary
 			gp->w[i][0] = g;
 			gp->w[i][1] = l;
 			gp->w[i][2] = q;
@@ -54,43 +59,51 @@ int wczytaj_graf(FILE * F, GraF* gp) {
 			gp->w[i][4] = -1;
 			edge = 5;
 		}
-		else if (sscanf(buf, "%d :%lf", &g, &l) == 2) { //Podano 1 parê
+		else if (sscanf(buf, "%d :%lf", &g, &l) == 2)
+		{ // Podano 1 parï¿½
 			gp->w[i][0] = g;
 			gp->w[i][1] = l;
 			gp->w[i][2] = -1;
 			edge = 3;
 		}
-		else //Brak danych lub niepoprawny format
+		else // Brak danych lub niepoprawny format
 			return 1;
-		if ((gp->w[i]=(double*)realloc(gp->w[i], (edge) * sizeof(double)))==NULL) //Obciêcie pamiêci
+		if ((gp->w[i] = (double *)realloc(gp->w[i], (edge) * sizeof(double))) == NULL) // Obciï¿½cie pamiï¿½ci
 			return 1;
 		i++;
 	}
-	if (i < a * b) //Wymiar jest wiêkszy ni¿ liczba wierzcho³ków
+	if (i < a * b) // Wymiar jest wiï¿½kszy niï¿½ liczba wierzchoï¿½kï¿½w
 		return 1;
 	free(buf);
 	return 0;
 }
-//Funkcja zapisuje graf do pliku
-void zapisz_graf(FILE *F, GraF *gp) {
-	int n =(gp->x)*(gp->y); //Liczba wierzcho³ków
+// Funkcja zapisuje graf do pliku
+void zapisz_graf(FILE *F, graph_t *gp)
+{
+	int n = (gp->x) * (gp->y); // Liczba wierzchoï¿½kï¿½w
 	int j;
-	fprintf(F,"%d %d\n",gp->x,gp->y);
-	for (int i = 0; i < n; i++) {
+	fprintf(F, "%d %d\n", gp->x, gp->y);
+	for (int i = 0; i < n; i++)
+	{
 		j = 0;
-		fprintf(F,"\t ");
-		while (gp->w[i][j] != -1) {
-			fprintf(F,"%d :%lf ", (int)gp->w[i][j], gp->w[i][j + 1]);
+		fprintf(F, "\t ");
+		while (gp->w[i][j] != -1)
+		{
+			fprintf(F, "%d :%lf ", (int)gp->w[i][j], gp->w[i][j + 1]);
 			j += 2;
 		}
-		fprintf(F,"\n");
+		fprintf(F, "\n");
 	}
 }
 
-//Funkcja zwalniaj¹ca graf
-void free_graf(GraF* gp) {
-	int n = (gp->x) * (gp->y);
+void free_graf(graph_t *gp)
+{
+	int n = (gp->x) * (gp->y); // liczba wierzchoÅ‚kÃ³w
+
 	for (int i = 0; i < n; i++)
-		free(gp->w[i]);
-	free(gp->w);
+		if (gp->w[i] != NULL)
+			free(gp->w[i]);
+
+	if (gp->w != NULL)
+		free(gp->w);
 }
