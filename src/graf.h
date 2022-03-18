@@ -3,10 +3,11 @@
 
 typedef struct Graf
 {
-	int x;		// liczba kolumn
-	int y;		// liczba wierszy
-	int n;		// liczba spójnych grafów
-	double **w; // lista sąsiedstwa dla wierzchołków i wag
+	int x;			 // liczba kolumn
+	int y;			 // liczba wierszy
+	int n;			 // liczba spójnych grafów
+	double min, max; // zakres wartości na wagach krawędzi w grafie
+	double **w;		 // lista sąsiedstwa dla wierzchołków i wag
 } graph_t;
 
 int wczytaj_graf(FILE *, graph_t *); // wczytuje graf z pliku
