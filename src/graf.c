@@ -77,6 +77,15 @@ int wczytaj_graf(FILE *F, graph_t *gp)
 	return 0;
 }
 
+void zainicjalizuj_graf(graph_t *gp)
+{
+	gp->x = -1;
+	gp->y = -1;
+	gp->n = -1;
+	gp->min = -1;
+	gp->max = -1;
+}
+
 void zapisz_graf(FILE *ouf, graph_t *gp)
 {
 	int n = (gp->x) * (gp->y); // liczba wierzchołków
