@@ -106,9 +106,9 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 			if (edge >= 8) // przerywa, gdy nie ma już miejsce na wstawienie
 				break;
 
-			if (fscanf(strstream, "%d", &tmp1) != 1)
+			if (fscanf(strstream, "%d :%lf", &tmp1, &tmp2) != 2)
 			{
-				fprintf(stderr, "Linia %d: Nie udało się wczytać numeru wierzchołka. Przerywam działanie.\n", i + 2);
+				fprintf(stderr, "Linia %d: Nie udało się wczytać danych. Przerywam działanie.\n", i + 2);
 				return 1;
 			}
 
@@ -122,21 +122,6 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 			{
 				fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
 				continue;
-			}
-
-			while ((ch = fgetc(strstream)) == ' ') // pomija whitespace
-				;
-
-			if (ch != ':') // zły format, nie ma ':' po whitespace
-			{
-				fprintf(stderr, "Linia %d: Błędny format pliku - wykryto znak \'%c\'. Przerywam działanie.\n", i + 2, ch);
-				return 1;
-			}
-
-			if (fscanf(strstream, "%lf", &tmp2) != 1)
-			{
-				fprintf(stderr, "Linia %d: Nie udało się wczytać wartości wagi. Przerywam działanie.\n", i + 2);
-				return 1;
 			}
 
 			if (tmp2 <= 0) // waga <= 0
