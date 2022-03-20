@@ -1,79 +1,170 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "graf.h"
 
 #define MAX_LENGTH 128
 
-// Funkcja wczytuje graf do struktury
-int wczytaj_graf(FILE *F, graph_t *gp)
+int czy_sasiaduja(int w1, int w2, int w, int k)
 {
-	int a, b;
-	char *buf = malloc(MAX_LENGTH * sizeof(buf)); // Bufor
-	double l, w, r, y;							  // Zmienne do wczytywania double
-	int g, q, e, t;
-	int edge = 0; // Liczba wczytanych danych
-	int i = 0;	  // Ile wierzcho�k�w wczytano
-	if (fscanf(F, "%d %d\n", &a, &b) != 2)
+	if (w1 >= k && w1 - k == w2) // w1 nie jest w 1. wierszu i sąsiaduje z górnym
 		return 1;
-	// Wczytywanie wymiar�w
-	gp->x = b;
-	gp->y = a;
-	// alokowanie pami�ci, rzutuje na typ, bo wcze�niej nie dzia�a�o XD
-	gp->w = malloc(a * b * sizeof(double *));
-	while (fgets(buf, MAX_LENGTH, F) != NULL && i < a * b)
+
+	if (w1 < k * (w - 1) && w1 + k == w2) // w1 nie jest w ostatnim wierszu i sąsiaduje z dolnym
+		return 1;
+
+	if (w1 % k != 0 && w1 - 1 == w2) // w1 nie jest w pierwszej kolumnie i sąsiaduje z lewym
+		return 1;
+
+	if ((w1 - w) % k != 0 && w1 + 1 == w2) // w1 nie jest w ostatniej kolumnie i sąsiaduje z prawym
+		return 1;
+
+	return 0;
+}
+
+// TODO: walidacja danych
+// - liczba spójnych grafów
+// - spójność danych: czy graf jest nieskierowany, czy dwa sasiędnie wierzchołki nawzajem się zawierają
+int wczytaj_graf(FILE *inf, graph_t *gp)
+{
+	char buf[MAX_LENGTH]; // bufor
+	int counter;		  // ile sąsiadów w jednym linii
+	int tmp1, ch;
+	double tmp2; // zmienna do wczytywania danych
+	FILE *strstream;
+
+	int edge; // liczba wczytanych danych
+
+	if (fgets(buf, MAX_LENGTH, inf) != NULL) // fgets, bo nie wiadomo jak się zachowa po fscanf -> fgets
 	{
-		if ((gp->w[i] = malloc(9 * sizeof(double))) == NULL) // Sprawdzanie czy otrzymano wska�nik
+		if (sscanf(buf, "%d %d\n", &gp->y, &gp->x) != 2)
+		{
+			fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
 			return 1;
-		if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r, &t, &y) == 8)
-		{ // Podano 4 pary
-			gp->w[i][0] = g;
-			gp->w[i][1] = l;
-			gp->w[i][2] = q;
-			gp->w[i][3] = w;
-			gp->w[i][4] = e;
-			gp->w[i][5] = r;
-			gp->w[i][6] = t;
-			gp->w[i][7] = y;
-			gp->w[i][8] = -1;
-			edge = 9;
 		}
-		else if (sscanf(buf, "%d :%lf  %d :%lf  %d :%lf", &g, &l, &q, &w, &e, &r) == 6)
-		{ // Podano 3 pary
-			gp->w[i][0] = g;
-			gp->w[i][1] = l;
-			gp->w[i][2] = q;
-			gp->w[i][3] = w;
-			gp->w[i][4] = e;
-			gp->w[i][5] = r;
-			gp->w[i][6] = -1;
-			edge = 7;
-		}
-		else if (sscanf(buf, "%d :%lf  %d :%lf", &g, &l, &q, &w) == 4)
-		{ // Podano 2 pary
-			gp->w[i][0] = g;
-			gp->w[i][1] = l;
-			gp->w[i][2] = q;
-			gp->w[i][3] = w;
-			gp->w[i][4] = -1;
-			edge = 5;
-		}
-		else if (sscanf(buf, "%d :%lf", &g, &l) == 2)
-		{ // Podano 1 par�
-			gp->w[i][0] = g;
-			gp->w[i][1] = l;
-			gp->w[i][2] = -1;
-			edge = 3;
-		}
-		else // Brak danych lub niepoprawny format
-			return 1;
-		if ((gp->w[i] = (double *)realloc(gp->w[i], (edge) * sizeof(double))) == NULL) // Obci�cie pami�ci
-			return 1;
-		i++;
 	}
-	if (i < a * b) // Wymiar jest wi�kszy ni� liczba wierzcho�k�w
+	else
+	{
+		fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
 		return 1;
-	free(buf);
+	}
+
+	if (gp->y <= 0 || gp->x <= 0) // warunek X > 0, Y > 0
+	{
+		if (gp->y <= 0)
+			fprintf(stderr, "Liczba wierszy musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", gp->y);
+
+		if (gp->x <= 0)
+			fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", gp->x);
+
+		return 1;
+	}
+
+	if ((gp->w = malloc(gp->y * gp->x * sizeof *gp->w)) == NULL) // alokowanie pamięci na wierzchołki
+	{
+		fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa. Przerywam działanie.\n");
+		return 1;
+	}
+
+	for (int i = 0; i < gp->y * gp->x; i++)
+	{
+		if (fgets(buf, MAX_LENGTH, inf) == NULL)
+		{
+			fprintf(stderr, "Nie udało się wczytać listy sąsiedstwa dla wierzchołka %d. Przerywam działanie\n", i);
+			return 1;
+		}
+
+		if ((gp->w[i] = malloc(8 * sizeof *gp->w[i])) == NULL) // czy udało się zaalokować pamięć dla 1 wierzchołka
+		{
+			fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa dla wierzchołka %d. Przerywam działanie.\n", i);
+			return 1;
+		}
+
+		counter = 0;
+
+		for (int j = 0; j < strlen(buf); j++) // liczy, ile par danych jest w jednej linii
+			if (buf[j] == ':')
+				counter++;
+
+		if (counter > 4)
+		{
+			fprintf(stderr, "W linii znajduje się powyżej 4 sąsiadujących wierzchołków: %d. Dane powyżej limitu zostaną pominięte.\n", counter);
+		}
+
+		strstream = fmemopen(buf, strlen(buf), "r");
+
+		if (strstream == NULL)
+		{
+			fprintf(stderr, "Nie udało się wczytać listy sąsiedstwa dla wierzchołka %d. Przerywam działanie\n", i);
+			return 1;
+		}
+
+		edge = 0;
+
+		for (int j = 0; j < counter; j++)
+		{
+			if (edge >= 8) // przerywa, gdy nie ma już miejsce na wstawienie
+				break;
+
+			if (fscanf(strstream, "%d", &tmp1) != 1)
+			{
+				fprintf(stderr, "Linia %d: Nie udało się wczytać numeru wierzchołka. Przerywam działanie.\n", i + 2);
+				return 1;
+			}
+
+			if (tmp1 < 0 || tmp1 >= gp->x * gp->y) // poza zakresem <0;liczba wierzchołków)
+			{
+				fprintf(stderr, "Linia %d: Wczytano nieprawidłowy indeks wierzchołka: %d. Przechodzę do następnych danych.\n", i + 2, tmp1);
+				continue;
+			}
+
+			if (czy_sasiaduja(i, tmp1, gp->y, gp->x) == 0) // sprawdza, czy mogą ze sobą sąsiadować
+			{
+				fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
+				continue;
+			}
+
+			while ((ch = fgetc(strstream)) == ' ') // pomija whitespace
+				;
+
+			if (ch != ':') // zły format, nie ma ':' po whitespace
+			{
+				fprintf(stderr, "Linia %d: Błędny format pliku - wykryto znak \'%c\'. Przerywam działanie.\n", i + 2, ch);
+				return 1;
+			}
+
+			if (fscanf(strstream, "%lf", &tmp2) != 1)
+			{
+				fprintf(stderr, "Linia %d: Nie udało się wczytać wartości wagi. Przerywam działanie.\n", i + 2);
+				return 1;
+			}
+
+			if (tmp2 <= 0) // waga <= 0
+			{
+				fprintf(stderr, "Linia %d: Wczytano nieprawidłową wagę: %f. Przechodzę do następnych danych.\n", i + 2, tmp2);
+				continue;
+			}
+
+			gp->w[i][edge] = (double)tmp1;
+			gp->w[i][edge = 1] = tmp2;
+
+			edge += 2;
+		}
+
+		if (edge < 8)
+		{
+			gp->w[i][edge] = -1;
+
+			if ((gp->w[i] = realloc(gp->w[i], (edge - 1) * sizeof *gp->w[i])) == NULL)
+			{
+				fprintf(stderr, "Nie udało się realokować pamięci na listę. Przerywam działanie.\n");
+				return 1;
+			}
+		}
+
+		fclose(strstream);
+	}
+
 	return 0;
 }
 
