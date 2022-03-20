@@ -28,7 +28,7 @@ int czy_sasiaduja(int w1, int w2, int w, int k)
 int wczytaj_graf(FILE *inf, graph_t *gp)
 {
     char buf[MAX_LENGTH]; // bufor
-    int counter; // ile sąsiadów w jednym linii
+    int counter;          // ile sąsiadów w jednym linii
     int tmp1, ch;
     double tmp2; // zmienna do wczytywania danych
     FILE *strstream;
@@ -42,7 +42,8 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
             return 1;
         }
-    } else
+    }
+    else
     {
         fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
         return 1;
@@ -144,7 +145,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 continue;
             }
 
-            gp->w[i][edge] = (double) tmp1;
+            gp->w[i][edge] = (double)tmp1;
             gp->w[i][edge + 1] = tmp2;
 
             edge += 2;
@@ -160,7 +161,6 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 return 1;
             }
         }
-
 
         fclose(strstream);
     }
@@ -192,7 +192,7 @@ void zapisz_graf(FILE *ouf, graph_t *gp)
             if (gp->w[i][j] == -1) // przerywa pętlę, jeżeli nie ma następnego sąsiada
                 break;
 
-            fprintf(ouf, "%d :%lf  ", (int) gp->w[i][j], gp->w[i][j + 1]);
+            fprintf(ouf, "%d :%lf  ", (int)gp->w[i][j], gp->w[i][j + 1]);
         }
 
         fprintf(ouf, "\n");
