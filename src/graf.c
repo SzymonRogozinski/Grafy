@@ -145,6 +145,12 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 continue;
             }
 
+            if (gp->min == -1 || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
+                gp->min = tmp2;
+
+            if (gp->max == -1 || tmp2 > gp->max) // wyznaczanie największej wagi do zakresu
+                gp->max = tmp2;
+
             gp->w[i][edge] = (double)tmp1;
             gp->w[i][edge + 1] = tmp2;
 
