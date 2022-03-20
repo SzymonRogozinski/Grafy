@@ -102,53 +102,65 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 		edge = 0;
 
 		for (int j = 0; j < counter; j++)
-		{
-			if (edge >= 8) // przerywa, gdy nie ma już miejsce na wstawienie
-				break;
+        {
+            if (edge >= 8) // przerywa, gdy nie ma już miejsce na wstawienie
+                break;
 
-			if (fscanf(strstream, "%d :%lf", &tmp1, &tmp2) != 2)
-			{
-				fprintf(stderr, "Linia %d: Nie udało się wczytać danych. Przerywam działanie.\n", i + 2);
-				return 1;
-			}
+            if (fscanf(strstream, "%d", &tmp1) != 1)
+            {
+                fprintf(stderr, "Linia %d: Nie udało się wczytać numeru wierzchołka. Przerywam działanie.\n", i + 2);
+                return 1;
+            }
 
-			if (tmp1 < 0 || tmp1 >= gp->x * gp->y) // poza zakresem <0;liczba wierzchołków)
-			{
-				fprintf(stderr, "Linia %d: Wczytano nieprawidłowy indeks wierzchołka: %d. Przechodzę do następnych danych.\n", i + 2, tmp1);
-				continue;
-			}
+            if (tmp1 < 0 || tmp1 >= gp->x * gp->y) // poza zakresem <0;liczba wierzchołków)
+            {
+                fprintf(stderr, "Linia %d: Wczytano nieprawidłowy indeks wierzchołka: %d. Przechodzę do następnych danych.\n", i + 2, tmp1);
+                continue;
+            }
 
-			if (czy_sasiaduja(i, tmp1, gp->y, gp->x) == 0) // sprawdza, czy mogą ze sobą sąsiadować
-			{
-				fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
-				continue;
-			}
+            if (czy_sasiaduja(i, tmp1, gp->y, gp->x) == 0) // sprawdza, czy mogą ze sobą sąsiadować
+            {
+                fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
+                continue;
+            }
 
-			if (tmp2 <= 0) // waga <= 0
-			{
-				fprintf(stderr, "Linia %d: Wczytano nieprawidłową wagę: %f. Przechodzę do następnych danych.\n", i + 2, tmp2);
-				continue;
-			}
+            while ((ch = fgetc(strstream)) == ' ') // pomija whitespace
+                ;
 
-			gp->w[i][edge] = (double)tmp1;
-			gp->w[i][edge = 1] = tmp2;
+            if (ch != ':') // zły format, nie ma ':' po whitespace
+            {
+                fprintf(stderr, "Linia %d: Błędny format pliku - wykryto znak \'%c\'. Przerywam działanie.\n", i + 2, ch);
+                return 1;
+            }
 
-			edge += 2;
-		}
+            if (fscanf(strstream, "%lf", &tmp2) != 1)
+            {
+                fprintf(stderr, "Linia %d: Nie udało się wczytać wartości wagi. Przerywam działanie.\n", i + 2);
+                return 1;
+            }
 
-		if (edge < 8)
-		{
-			gp->w[i][edge] = -1;
+            if (tmp2 <= 0) // waga <= 0
+            {
+                fprintf(stderr, "Linia %d: Wczytano nieprawidłową wagę: %f. Przechodzę do następnych danych.\n", i + 2, tmp2);
+                continue;
+            }
 
-			if ((gp->w[i] = realloc(gp->w[i], (edge - 1) * sizeof *gp->w[i])) == NULL)
-			{
-				fprintf(stderr, "Nie udało się realokować pamięci na listę. Przerywam działanie.\n");
-				return 1;
-			}
-		}
+            gp->w[i][edge] = (double) tmp1;
+            gp->w[i][edge + 1] = tmp2;
 
-		fclose(strstream);
-	}
+            edge += 2;
+        }
+
+        if (edge < 8)
+        {
+            gp->w[i][edge] = -1;
+
+            if ((gp->w[i] = realloc(gp->w[i], (edge + 1) * sizeof *gp->w[i])) == NULL)
+            {
+                fprintf(stderr, "Nie udało się realokować pamięci na listę. Przerywam działanie.\n");
+                return 1;
+            }
+        }
 
 	return 0;
 }
