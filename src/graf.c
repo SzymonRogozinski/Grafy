@@ -181,6 +181,7 @@ void zainicjalizuj_graf(graph_t *gp)
     gp->n = -1;
     gp->min = -1;
     gp->max = -1;
+    gp->w = NULL;
 }
 
 void zapisz_graf(FILE *ouf, graph_t *gp)
@@ -188,6 +189,14 @@ void zapisz_graf(FILE *ouf, graph_t *gp)
     int n = (gp->x) * (gp->y); // liczba wierzchołków
 
     fprintf(ouf, "%d %d\n", gp->y, gp->x);
+
+    if (gp->w == NULL) // jeżeli tablica jest pusta jakimś cudem
+    {
+        for (int i = 0; i < n; i++)
+            fprintf(ouf, "\n");
+
+        return;
+    }
 
     for (int i = 0; i < n; i++)
     {
