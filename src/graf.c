@@ -190,6 +190,14 @@ void zapisz_graf(FILE *ouf, graph_t *gp)
 
     fprintf(ouf, "%d %d\n", gp->y, gp->x);
 
+    if (gp->w == NULL) // jeżeli tablica jest pusta jakimś cudem
+    {
+        for (int i = 0; i < n; i++)
+            fprintf(ouf, "\n");
+
+        return;
+    }
+
     for (int i = 0; i < n; i++)
     {
         fprintf(ouf, "\t ");
