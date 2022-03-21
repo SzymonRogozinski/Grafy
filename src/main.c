@@ -128,7 +128,23 @@ int main(int argc, char **argv)
             printf("Podano dane wejściowe poprzez argumenty wywołania oraz plik wejściowy. Generuję graf na podstawie danych z pliku...\n");
         }
 
-        return 0; // TODO: wczytywanie grafu
+        FILE *inf = fopen(in, "r");
+
+        if (inf == NULL)
+        {
+            fprintf(stderr, "Nie udało się otworzyć pliku wejściowego. Przerywam działanie.\n");
+
+            exit(EXIT_FAILURE);
+        }
+
+        if (wczytaj_graf(inf,gp))
+        {
+            fprintf(stderr, "Wystąpił błąd podczas wczytywania pliku wejściowego.\n");
+
+            exit(EXIT_FAILURE);
+        }
+
+        fclose(inf);
     }
     else // generowanie na podstawie danych wejściowych
     {
@@ -185,6 +201,12 @@ int main(int argc, char **argv)
         fprintf(stderr, "Indeksy wierzchołków ST=%d, SP=%d nie należą do zakresu <0;%d>. Przerywam działanie.\n", st, sp, gp->x * gp->y - 1);
 
         exit(EXIT_FAILURE);
+    }
+
+    if (gp != NULL)
+    {
+        zwolnij_graf(gp);
+        free(gp);
     }
 
     return 0;
