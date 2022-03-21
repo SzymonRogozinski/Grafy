@@ -13,9 +13,9 @@
 int main(int argc, char **argv)
 {
     int opt;
-    char *in = NULL; // plik wejściowy
+    char *in = NULL;  // plik wejściowy
     char *out = NULL; // plik wyjściowy
-    int byParam = 0; // czy podano dane wejściowe przez argumenty wywołania; 0 - nie, 1 - tak
+    int byParam = 0;  // czy podano dane wejściowe przez argumenty wywołania; 0 - nie, 1 - tak
 
     graph_t *gp = malloc(sizeof *gp);
     zainicjalizuj_graf(gp);
@@ -165,7 +165,19 @@ int main(int argc, char **argv)
 
     if (out != NULL)
     {
-        return 0; // TODO: zapisanie grafu do pliku
+        FILE *ouf = fopen(out, "w+");
+
+        if (ouf == NULL)
+        {
+            fprintf(stderr, "Nie udało się otworzyć pliku do zapisania grafu.\n");
+        }
+        else
+        {
+            zapisz_graf(ouf, gp);
+            printf("Zapisano graf do pliku %s.\n", out);
+        }
+
+        fclose(ouf);
     }
 
     if (st >= gp->x * gp->y || sp >= gp->x * gp->y) // wierzchołek ST/SP poza dostępnym zakresem
