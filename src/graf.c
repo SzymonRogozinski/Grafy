@@ -181,6 +181,7 @@ void zainicjalizuj_graf(graph_t *gp)
     gp->n = -1;
     gp->min = -1;
     gp->max = -1;
+    gp->w = NULL;
 }
 
 void zapisz_graf(FILE *ouf, graph_t *gp)
