@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         case 'r':
             byParam = 1;
 
-            if (sscanf(optarg, "%d-%d", &gp->min, &gp->max) != 2)
+            if (sscanf(optarg, "%lf-%lf", &gp->min, &gp->max) != 2)
             {
                 fprintf(stderr, "Błędny format wartości argumentu \"-r\" - oczekiwano \"<min>-<max>\". Przerywam działanie.\n");
 
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 
             if (gp->min < 0 || gp->max <= gp->min)
             {
-                fprintf(stderr, "Błędny zakres wag krawędzi - wczytano “%d-%d”. Przerywam działanie.\n", gp->min, gp->max);
+                fprintf(stderr, "Błędny zakres wag krawędzi - wczytano “%g-%g”. Przerywam działanie.\n", gp->min, gp->max);
 
                 exit(EXIT_FAILURE);
             }
@@ -140,6 +140,13 @@ int main(int argc, char **argv)
         if (wczytaj_graf(inf,gp))
         {
             fprintf(stderr, "Wystąpił błąd podczas wczytywania pliku wejściowego.\n");
+
+            exit(EXIT_FAILURE);
+        }
+
+        if (sprawdz_integralnosc(gp) == 0)
+        {
+            fprintf(stderr, "Dane w grafie nie są integralne.\n");
 
             exit(EXIT_FAILURE);
         }

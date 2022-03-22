@@ -7,16 +7,29 @@
 
 int czy_sasiaduja(int w1, int w2, int w, int k)
 {
-    if (w1 >= k && w1 - k == w2) // w1 nie jest w 1. wierszu i sąsiaduje z górnym
-        return 1;
+    int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
 
-    if (w1 < k * (w - 1) && w1 + k == w2) // w1 nie jest w ostatnim wierszu i sąsiaduje z dolnym
-        return 1;
+    while (w1 >= 0)
+    {
+        if (w1 < k)
+        {
+            col1 = w1 + 1;
+        }
+        w1 -= k;
+        row1 += 1;
+    }
 
-    if (w1 % k != 0 && w1 - 1 == w2) // w1 nie jest w pierwszej kolumnie i sąsiaduje z lewym
-        return 1;
+    while (w2 >= 0)
+    {
+        if (w2 < k)
+        {
+            col2 = w2 + 1;
+        }
+        w2 -= k;
+        row2 += 1;
+    }
 
-    if ((w1 - w) % k != 0 && w1 + 1 == w2) // w1 nie jest w ostatniej kolumnie i sąsiaduje z prawym
+    if (abs(row1 - row2) == 1 || abs(col1 - col2) == 1)
         return 1;
 
     return 0;
@@ -24,7 +37,6 @@ int czy_sasiaduja(int w1, int w2, int w, int k)
 
 // TODO: walidacja danych
 // - liczba spójnych grafów
-// - spójność danych: czy graf jest nieskierowany, czy dwa sasiędnie wierzchołki nawzajem się zawierają
 int wczytaj_graf(FILE *inf, graph_t *gp)
 {
     char buf[MAX_LENGTH]; // bufor
@@ -224,4 +236,58 @@ void zwolnij_graf(graph_t *gp)
 
     if (gp->w != NULL)
         free(gp->w);
+}
+
+int sprawdz_integralnosc(graph_t *gp)
+{
+    if (gp->w == NULL) // gdyby jakimś cudem tablica była pusta
+        return 0;
+
+    int w2;             // indeks drugiego wierzchołka (w1 to pierwszy)
+    double waga;        // do przechowywania wagi
+    int czy_znaleziono; // sprawdza czy znaleziono połączenie gdy przeszło po 4 sąsiedzie i nadal nie znalazło
+
+    for (int w1 = 0; w1 < gp->x * gp->y; w1++)
+    {
+        for (int i = 0; i < 8; i += 2)
+        {
+            if (gp->w[w1][i] == -1)
+                break;
+
+            w2 = gp->w[w1][i];
+            waga = gp->w[w1][i + 1];
+            czy_znaleziono = 0;
+
+            for (int j = 0; j < 8; j += 2) // TODO: jeżeli doszło do 8 i nadal nie znalazło
+            {
+                if (gp->w[w2][j] == -1) // jeżeli doszło do końca listy i nie było w1
+                {
+                    fprintf(stderr, "Nie znaleziono obustronnego połączenia między wierzchołkami %d i %d. Przerywam działanie.\n", w1, w2);
+                    return 0;
+                }
+
+                if (gp->w[w2][j] == w1) // jest połączenie obustronne w1 -- w2
+                {
+                    if (gp->w[w2][j + 1] == waga)
+                    {
+                        czy_znaleziono = 1;
+                        break;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "Wykryto niezgodność wag na krawędzi między wierzchołkami %d i %d: %g a %g. Przerywam działanie.\n", w1, w2, gp->w[w2][j + 1], waga);
+                        return 0;
+                    }
+                }
+            }
+
+            if (!czy_znaleziono) // jeżeli wsród 4 sąsiadów nie znaleziono połączenia
+            {
+                fprintf(stderr, "Nie znaleziono obustronnego połączenia między wierzchołkami %d i %d. Przerywam działanie.\n", w1, w2);
+                return 0;
+            }
+        }
+    }
+
+    return 1;
 }
