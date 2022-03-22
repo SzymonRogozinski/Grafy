@@ -225,3 +225,57 @@ void zwolnij_graf(graph_t *gp)
     if (gp->w != NULL)
         free(gp->w);
 }
+
+int sprawdz_integralnosc(graph_t *gp)
+{
+    if (gp->w == NULL) // gdyby jakimś cudem tablica była pusta
+        return 0;
+
+    int w2;             // indeks drugiego wierzchołka (w1 to pierwszy)
+    double waga;        // do przechowywania wagi
+    int czy_znaleziono; // sprawdza czy znaleziono połączenie gdy przeszło po 4 sąsiedzie i nadal nie znalazło
+
+    for (int w1 = 0; w1 < gp->x * gp->y; w1++)
+    {
+        for (int i = 0; i < 8; i += 2)
+        {
+            if (gp->w[w1][i] == -1)
+                break;
+
+            w2 = gp->w[w1][i];
+            waga = gp->w[w1][i + 1];
+            czy_znaleziono = 0;
+
+            for (int j = 0; j < 8; j += 2) // TODO: jeżeli doszło do 8 i nadal nie znalazło
+            {
+                if (gp->w[w2][j] == -1) // jeżeli doszło do końca listy i nie było w1
+                {
+                    fprintf(stderr, "Nie znaleziono obustronnego połączenia między wierzchołkami %d i %d. Przerywam działanie.\n", w1, w2);
+                    return 0;
+                }
+
+                if (gp->w[w2][j] == w1) // jest połączenie obustronne w1 -- w2
+                {
+                    if (gp->w[w2][j + 1] == waga)
+                    {
+                        czy_znaleziono = 1;
+                        break;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "Wykryto niezgodność wag na krawędzi między wierzchołkami %d i %d: %g a %g. Przerywam działanie.\n", w1, w2, gp->w[w2][j + 1], waga);
+                        return 0;
+                    }
+                }
+            }
+
+            if (!czy_znaleziono) // jeżeli wsród 4 sąsiadów nie znaleziono połączenia
+            {
+                fprintf(stderr, "Nie znaleziono obustronnego połączenia między wierzchołkami %d i %d. Przerywam działanie.\n", w1, w2);
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
