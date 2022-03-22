@@ -144,6 +144,13 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
 
+        if (sprawdz_integralnosc(gp) == 0)
+        {
+            fprintf(stderr, "Dane w grafie nie są integralne.\n");
+
+            exit(EXIT_FAILURE);
+        }
+
         fclose(inf);
     }
     else // generowanie na podstawie danych wejściowych

@@ -24,7 +24,6 @@ int czy_sasiaduja(int w1, int w2, int w, int k)
 
 // TODO: walidacja danych
 // - liczba spójnych grafów
-// - spójność danych: czy graf jest nieskierowany, czy dwa sasiędnie wierzchołki nawzajem się zawierają
 int wczytaj_graf(FILE *inf, graph_t *gp)
 {
     char buf[MAX_LENGTH]; // bufor
