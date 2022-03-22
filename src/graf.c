@@ -7,16 +7,29 @@
 
 int czy_sasiaduja(int w1, int w2, int w, int k)
 {
-    if (w1 >= k && w1 - k == w2) // w1 nie jest w 1. wierszu i sąsiaduje z górnym
-        return 1;
+    int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
 
-    if (w1 < k * (w - 1) && w1 + k == w2) // w1 nie jest w ostatnim wierszu i sąsiaduje z dolnym
-        return 1;
+    while (w1 >= 0)
+    {
+        if (w1 < k)
+        {
+            col1 = w1 + 1;
+        }
+        w1 -= k;
+        row1 += 1;
+    }
 
-    if (w1 % k != 0 && w1 - 1 == w2) // w1 nie jest w pierwszej kolumnie i sąsiaduje z lewym
-        return 1;
+    while (w2 >= 0)
+    {
+        if (w2 < k)
+        {
+            col2 = w2 + 1;
+        }
+        w2 -= k;
+        row2 += 1;
+    }
 
-    if ((w1 - w) % k != 0 && w1 + 1 == w2) // w1 nie jest w ostatniej kolumnie i sąsiaduje z prawym
+    if (abs(row1 - row2) == 1 || abs(col1 - col2) == 1)
         return 1;
 
     return 0;
