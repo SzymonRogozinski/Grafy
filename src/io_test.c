@@ -51,6 +51,13 @@ int main(int argc, char **argv)
         printf("\n");
     }
 
+    printf("\n");
+
+    if (sprawdz_integralnosc(G))
+        printf("Dane w grafie są integralne.\n");
+    else
+        printf("Dane w grafie nie są integralne.\n");
+
     FILE *ouf = fopen("wyj.txt", "w+");
 
     if (ouf != NULL)
