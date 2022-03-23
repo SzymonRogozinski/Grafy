@@ -42,7 +42,10 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
     char buf[MAX_LENGTH]; // bufor
     int counter;          // ile sąsiadów w jednym linii
     int tmp1, ch;
-    double tmp2; // zmienna do wczytywania danych
+    double tmp2;        // zmienna do wczytywania danych
+    int wierz[4];       // przechowuje indeksy wierzchołków, żeby nie dodać dwóch takich samych w jednej linii
+    int n;              // ile już wczytano wierzchołków
+    int czy_znaleziono; // potrzebne do warunku wyżej
     FILE *strstream;
 
     int edge; // liczba wczytanych danych
@@ -92,6 +95,9 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             return 1;
         }
 
+        for (int wi = 0; wi < 4; wi++)
+            wierz[wi] = -1;
+
         counter = 0;
 
         for (int j = 0; j < strlen(buf); j++) // liczy, ile par danych jest w jednej linii
@@ -112,11 +118,14 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         }
 
         edge = 0;
+        n = 0;
 
         for (int j = 0; j < counter; j++)
         {
             if (edge >= 8) // przerywa, gdy nie ma już miejsce na wstawienie
                 break;
+
+            czy_znaleziono = 0;
 
             if (fscanf(strstream, "%d", &tmp1) != 1)
             {
@@ -157,6 +166,19 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 continue;
             }
 
+            for (int wi = 0; wi < 4; wi++)
+            {
+                if (tmp1 == wierz[wi]) // jeżeli w tej linii już był ten wierzchołek
+                {
+                    fprintf(stderr, "Połączenie między tymi wierzchołkami zostało już zdefiniowane. Przechodzę do następnych danych.\n");
+                    czy_znaleziono = 1;
+                    break;
+                }
+            }
+
+            if (czy_znaleziono) // pomija połączenie, jeśli już jakieś jest dla tego wierzchołka
+                continue;
+
             if (gp->min == -1 || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
                 gp->min = tmp2;
 
@@ -166,7 +188,10 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             gp->w[i][edge] = (double)tmp1;
             gp->w[i][edge + 1] = tmp2;
 
+            wierz[n] = tmp1;
+
             edge += 2;
+            n++;
         }
 
         if (edge < 8)
