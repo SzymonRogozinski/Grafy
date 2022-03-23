@@ -176,7 +176,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 }
             }
 
-            if (czy_znaleziono)
+            if (czy_znaleziono) // pomija połączenie, jeśli już jakieś jest dla tego wierzchołka
                 continue;
 
             if (gp->min == -1 || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
