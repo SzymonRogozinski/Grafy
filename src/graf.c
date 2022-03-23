@@ -165,7 +165,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
             for (int wi = 0; wi < 4; wi++)
             {
-                if (tmp1 == wierz[n]) // jeżeli w tej linii już był ten wierzchołek
+                if (tmp1 == wierz[wi]) // jeżeli w tej linii już był ten wierzchołek
                 {
                     fprintf(stderr, "Połączenie między tymi wierzchołkami zostało już zdefiniowane. Przechodzę do następnych danych.\n");
                     continue;
