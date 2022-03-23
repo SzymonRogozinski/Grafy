@@ -42,9 +42,10 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
     char buf[MAX_LENGTH]; // bufor
     int counter;          // ile sąsiadów w jednym linii
     int tmp1, ch;
-    double tmp2;  // zmienna do wczytywania danych
-    int wierz[4]; // przechowuje indeksy wierzchołków, żeby nie dodać dwóch takich samych w jednej linii
-    int n;        // ile już wczytano wierzchołków
+    double tmp2;        // zmienna do wczytywania danych
+    int wierz[4];       // przechowuje indeksy wierzchołków, żeby nie dodać dwóch takich samych w jednej linii
+    int n;              // ile już wczytano wierzchołków
+    int czy_znaleziono; // potrzebne do warunku wyżej
     FILE *strstream;
 
     int edge; // liczba wczytanych danych
@@ -124,6 +125,8 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (edge >= 8) // przerywa, gdy nie ma już miejsce na wstawienie
                 break;
 
+            czy_znaleziono = 0;
+
             if (fscanf(strstream, "%d", &tmp1) != 1)
             {
                 fprintf(stderr, "Linia %d: Nie udało się wczytać numeru wierzchołka. Przerywam działanie.\n", i + 2);
@@ -168,9 +171,13 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 if (tmp1 == wierz[wi]) // jeżeli w tej linii już był ten wierzchołek
                 {
                     fprintf(stderr, "Połączenie między tymi wierzchołkami zostało już zdefiniowane. Przechodzę do następnych danych.\n");
-                    continue;
+                    czy_znaleziono = 1;
+                    break;
                 }
             }
+
+            if (czy_znaleziono)
+                continue;
 
             if (gp->min == -1 || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
                 gp->min = tmp2;
