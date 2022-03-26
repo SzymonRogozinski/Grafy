@@ -44,7 +44,6 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
     int tmp1, ch;
     double tmp2;        // zmienna do wczytywania danych
     int wierz[4];       // przechowuje indeksy wierzchołków, żeby nie dodać dwóch takich samych w jednej linii
-    int n;              // ile już wczytano wierzchołków
     int czy_znaleziono; // potrzebne do warunku wyżej
     FILE *strstream;
 
@@ -95,9 +94,6 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             return 1;
         }
 
-        for (int wi = 0; wi < 4; wi++)
-            wierz[wi] = -1;
-
         counter = 0;
 
         for (int j = 0; j < strlen(buf); j++) // liczy, ile par danych jest w jednej linii
@@ -118,7 +114,6 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         }
 
         edge = 0;
-        n = 0;
 
         for (int j = 0; j < counter; j++)
         {
@@ -166,7 +161,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 continue;
             }
 
-            for (int wi = 0; wi < 4; wi++)
+            for (int wi = 0; wi < edge / 2; wi++)
             {
                 if (tmp1 == wierz[wi]) // jeżeli w tej linii już był ten wierzchołek
                 {
@@ -188,10 +183,9 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             gp->w[i][edge] = (double)tmp1;
             gp->w[i][edge + 1] = tmp2;
 
-            wierz[n] = tmp1;
+            wierz[edge / 2] = tmp1;
 
             edge += 2;
-            n++;
         }
 
         if (edge < 8)
