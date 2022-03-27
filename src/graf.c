@@ -324,30 +324,42 @@ int generuj_graf(int x, int y, double max, double min, int n) {
     G->n = n;
     G->w = malloc(G->x * G->y * sizeof * G->w);
     if (G->w == NULL)
-        return 0;
+        return 1;
     for (int i = 0; i < G->x * G->y;i++) {
-        G->w[i] = malloc(9 * sizeof * G->w[i]);
+        G->w[i] = malloc(8 * sizeof * G->w[i]);
         if (G->w[i] == NULL)
-            return 0;
+            return 1;
     }
-    //Generowanie
+    //Zapisywanie sąsiadów
+    int position;
     for (int i = 0; i < G->x * G->y; i++) {
-        if ((i+1)%G->x!=0) { //Czy po prawej ma sąsiada
-            int r = 1;//liczba losowa
-            G->w[i][0] = r;
-            G->w[i + 1][0] = r;
+        position = 0;
+        if (i>=G->x) { //Czy ma nad sobą sąsiada
+            G->w[i][position] = i - G->x;
+            position += 2;
         }
-        if (i%G->x!=G->y-1) { //Czy pod sobą ma sąsiada
-            int r = 1;//liczba losowa
-            G->w[i][1] = r;
-            G->w[i+G->x][1] = r;
+        if (i%G->x!=0) { //Czy ma po lewej sąsiada
+            G->w[i][position] = i - 1;
+            position += 2;
         }
-        G->w[i][2] = -1.0; //Flaga końcowa
-    }
+        if ((i+1) % G->x != 0) { //Czy ma po prawej sąsiada
+            G->w[i][position] = i + 1;
+            position += 2;
+        }
+        if (i/G->x==G->y-1) { //Czy ma pod sobą sąsiada
+            G->w[i][position] = i + G->x;
+            position += 2;
+        }
+        if (position!=8) {
+            G->w[i][position] = -1.0; //Flaga końcowa
+            if ((G->w[i] = realloc(G->w[i], (position + 1) * sizeof * G->w[i])) == NULL)
+                return 1;
+            }
+        }
 
 
     if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
-        return 1;
+        return 0;
     }
-    return 1; //Jeśli wszystko poprawne
+    return 0; //Jeśli wszystko poprawne
 }
