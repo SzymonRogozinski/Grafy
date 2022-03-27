@@ -25,5 +25,7 @@ void wyznacz_n_siatki(graph_t *);		   // wyznacza liczbę spójnych grafów w si
 void znajdz_droge(graph_t *, int, int);	   // wyznacza najkrótszą drogę między dwoma wierzchołkami
 void wyswietl_sciezke(int *, int);		   // wyświetla ścieżkę poprzedników
 int generuj_graf(int, int, double, double, int);	//Generuje graf o podanych parametrach
+int szukaj_wierzcholek(int, int, graph_t*);		//Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
+double losuj_wage(graph_t);		//Losuje wagę, dla danego grafu
 
 #endif
