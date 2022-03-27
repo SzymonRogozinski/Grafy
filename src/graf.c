@@ -519,3 +519,20 @@ void znajdz_droge(graph_t *gp, int st, int sp)
     free(kolejka_prio->queue);
     free(kolejka_prio);
 }
+
+int generuj_graf(int x, int y, double max, double min, int n)
+{
+    if (x < 1 || y < 1 || n < 1 || min <= 0 || max <= 0 || min > max) // Czy dane są poprawne
+        return 1;
+    // Wczytywanie danych
+    graph_t *G;
+    zainicjalizuj_graf(G);
+    G->x = x;
+    G->y = y;
+    G->max = max;
+    G->min = min;
+    G->n = n;
+    G->w = malloc(G->x * G->y * sizeof *G->w);
+    if (G->w == NULL)
+        return 1;
+}
