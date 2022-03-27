@@ -520,19 +520,43 @@ void znajdz_droge(graph_t *gp, int st, int sp)
     free(kolejka_prio);
 }
 
-int generuj_graf(int x, int y, double max, double min, int n)
-{
-    if (x < 1 || y < 1 || n < 1 || min <= 0 || max <= 0 || min > max) // Czy dane są poprawne
-        return 1;
-    // Wczytywanie danych
-    graph_t *G;
+int generuj_graf(int x, int y, double max, double min, int n) {
+    if (x < 1 || y < 1 || n<1 || min <= 0 || max <= 0 || min>max) //Czy dane są poprawne
+        return 0;
+    //Wczytywanie danych
+    graph_t* G;
     zainicjalizuj_graf(G);
     G->x = x;
     G->y = y;
     G->max = max;
     G->min = min;
     G->n = n;
-    G->w = malloc(G->x * G->y * sizeof *G->w);
+    G->w = malloc(G->x * G->y * sizeof * G->w);
     if (G->w == NULL)
+        return 0;
+    for (int i = 0; i < G->x * G->y;i++) {
+        G->w[i] = malloc(9 * sizeof * G->w[i]);
+        if (G->w[i] == NULL)
+            return 0;
+    }
+    //Generowanie
+    for (int i = 0; i < G->x * G->y; i++) {
+        if ((i+1)%G->x!=0) { //Czy po prawej ma sąsiada
+            int r = 1;//liczba losowa
+            G->w[i][0] = r;
+            G->w[i + 1][0] = r;
+        }
+        if (i%G->x!=G->y-1) { //Czy pod sobą ma sąsiada
+            int r = 1;//liczba losowa
+            G->w[i][1] = r;
+            G->w[i+G->x][1] = r;
+        }
+        G->w[i][2] = -1.0; //Flaga końcowa
+    }
+
+
+    if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
         return 1;
+    }
+    return 1; //Jeśli wszystko poprawne
 }
