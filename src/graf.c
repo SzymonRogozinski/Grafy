@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "graf.h"
 
@@ -312,6 +313,7 @@ int sprawdz_integralnosc(graph_t *gp)
 }
 
 int generuj_graf(int x, int y, double max, double min, int n) {
+    srand(time(NULL));
     if (x < 1 || y < 1 || n<1 || min <= 0 || max <= 0 || min>max) //Czy dane są poprawne
         return 0;
     //Wczytywanie danych
@@ -350,16 +352,49 @@ int generuj_graf(int x, int y, double max, double min, int n) {
             G->w[i][position] = i + G->x;
             position += 2;
         }
-        if (position!=8) {
+        if (position<8) {
             G->w[i][position] = -1.0; //Flaga końcowa
             if ((G->w[i] = realloc(G->w[i], (position + 1) * sizeof * G->w[i])) == NULL)
                 return 1;
-            }
         }
-
+    }
+    //Zapisywanie wag
+    for (int i = 0; i < G->x * G->y; i++) {
+        position = 1;
+        if (i >= G->x) { //Czy ma nad sobą sąsiada |Przepisuje|
+            G->w[i][position] = G->w[i - G->x][szukaj_wierzcholek(i,i-G->x,G)+1];
+            position += 2;
+        }
+        if (i % G->x != 0) { //Czy ma po lewej sąsiada |Przepisuje|
+            G->w[i][position] = G->w[i - 1][szukaj_wierzcholek(i, i - 1, G)+1];
+            position += 2;
+        }
+        if ((i + 1) % G->x != 0) { //Czy ma po prawej sąsiada |Losuje|
+            G->w[i][position] = losuje_wage(G); 
+            position += 2;
+        }
+        if (i / G->x == G->y - 1) { //Czy ma pod sobą sąsiada |Losuje|
+            G->w[i][position] = losuje_wage(G);
+        }
+    }
 
     if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
         return 0;
     }
     return 0; //Jeśli wszystko poprawne
+}
+
+//Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
+int szukaj_wierzcholek(int edge,int seek,graph_t *G) {
+    int i = 0;
+    while (G->w[edge][i]!=(double)seek)
+        i += 2;
+    return i;
+}
+
+//Losuje wagę
+double losuj_wage(graph_t* G) {
+    double min = G->min;
+    double max = G->max;
+    return (double)rand()/RAND_MAX*max-min;
 }
