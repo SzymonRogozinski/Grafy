@@ -596,9 +596,9 @@ int generuj_graf(graph_t* G,int x, int y, double max, double min, int n) {
 //Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
 int szukaj_wierzcholek(int edge,int seek,graph_t *G) {
     int i = 0;
-    while (G->w[edge][i]!=(double)seek)
+    while (G->w[edge][i]!=(double)seek && i<8)
         i += 2;
-    return i;
+    return i<8 ? i: -1;
 }
 
 //Losuje wagę
