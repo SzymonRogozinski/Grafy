@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -106,7 +107,8 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             fprintf(stderr, "W linii znajduje się powyżej 4 sąsiadujących wierzchołków: %d. Dane powyżej limitu zostaną pominięte.\n", counter);
         }
 
-        strstream = fmemopen(buf, strlen(buf), "r");
+        //strstream = fmemopen(buf, strlen(buf), "r");
+        strstream = NULL; //Musiałem zakomentować, bo nie działa na windowsie XD
 
         if (strstream == NULL)
         {
@@ -312,13 +314,11 @@ int sprawdz_integralnosc(graph_t *gp)
     return 1;
 }
 
-int generuj_graf(int x, int y, double max, double min, int n) {
+int generuj_graf(graph_t* G,int x, int y, double max, double min, int n) {
     srand(time(NULL));
     if (x < 1 || y < 1 || n<1 || min <= 0 || max <= 0 || min>max) //Czy dane są poprawne
         return 0;
     //Wczytywanie danych
-    graph_t* G;
-    zainicjalizuj_graf(G);
     G->x = x;
     G->y = y;
     G->max = max;
@@ -348,7 +348,7 @@ int generuj_graf(int x, int y, double max, double min, int n) {
             G->w[i][position] = i + 1;
             position += 2;
         }
-        if (i/G->x==G->y-1) { //Czy ma pod sobą sąsiada
+        if (i/G->x!=G->y-1) { //Czy ma pod sobą sąsiada
             G->w[i][position] = i + G->x;
             position += 2;
         }
@@ -362,22 +362,22 @@ int generuj_graf(int x, int y, double max, double min, int n) {
     for (int i = 0; i < G->x * G->y; i++) {
         position = 1;
         if (i >= G->x) { //Czy ma nad sobą sąsiada |Przepisuje|
-            G->w[i][position] = G->w[i - G->x][szukaj_wierzcholek(i,i-G->x,G)+1];
+            G->w[i][position] = G->w[i - G->x][szukaj_wierzcholek(i - G->x,i,G)+1];
             position += 2;
         }
         if (i % G->x != 0) { //Czy ma po lewej sąsiada |Przepisuje|
-            G->w[i][position] = G->w[i - 1][szukaj_wierzcholek(i, i - 1, G)+1];
+            G->w[i][position] = G->w[i - 1][szukaj_wierzcholek(i-1, i, G)+1];
             position += 2;
         }
         if ((i + 1) % G->x != 0) { //Czy ma po prawej sąsiada |Losuje|
-            G->w[i][position] = losuje_wage(G); 
+            G->w[i][position] = losuj_wage(G); 
             position += 2;
         }
-        if (i / G->x == G->y - 1) { //Czy ma pod sobą sąsiada |Losuje|
-            G->w[i][position] = losuje_wage(G);
+        if (i / G->x != G->y - 1) { //Czy ma pod sobą sąsiada |Losuje|
+            G->w[i][position] = losuj_wage(G);
         }
+       
     }
-
     if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
         return 0;
     }
@@ -396,5 +396,5 @@ int szukaj_wierzcholek(int edge,int seek,graph_t *G) {
 double losuj_wage(graph_t* G) {
     double min = G->min;
     double max = G->max;
-    return (double)rand()/RAND_MAX*max-min;
+    return (double)rand()/RAND_MAX*(max-min)+min;
 }
