@@ -370,11 +370,11 @@ int generuj_graf(graph_t* G,int x, int y, double max, double min, int n) {
             position += 2;
         }
         if ((i + 1) % G->x != 0) { //Czy ma po prawej sąsiada |Losuje|
-            G->w[i][position] = losuj_wage(G); 
+            G->w[i][position] = losuj(G->min, G->max);
             position += 2;
         }
         if (i / G->x != G->y - 1) { //Czy ma pod sobą sąsiada |Losuje|
-            G->w[i][position] = losuj_wage(G);
+            G->w[i][position] = losuj(G->min,G->max);
         }
        
     }
@@ -392,9 +392,20 @@ int szukaj_wierzcholek(int edge,int seek,graph_t *G) {
     return i<8 ? i: -1;
 }
 
-//Losuje wagę
-double losuj_wage(graph_t* G) {
-    double min = G->min;
-    double max = G->max;
+//Losuje liczbę z podanego zakresu
+double losuj(double min,double max) {
     return (double)rand()/RAND_MAX*(max-min)+min;
+}
+
+//Funkcja dzieląca jeden graf na dwa
+void dziel_graf(graph_t* G) {
+
+}
+
+//Liczy ile sąsiadów ma wierzchołek
+int ile_sasiadow(graph_t* G,int edge) {
+    int n = 0;
+    while (n < 4 && G->w[edge][n*2]!=-1.0)
+        n++;
+    return n;
 }
