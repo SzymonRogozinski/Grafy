@@ -312,14 +312,14 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
             if (gp->w[tmp][i] == -1)
                 break;
 
-            if (czy_odwiedzono[gp->w[tmp][i]] == 0)
+            if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
             {
-                if (dodaj_element(kolejka, gp->w[tmp][i]) == 0) // jeżeli nie udało się dodać
+                if (dodaj_element(kolejka, (int)gp->w[tmp][i]) == 0) // jeżeli nie udało się dodać
                 {
                     exit(EXIT_FAILURE);
                 }
 
-                czy_odwiedzono[gp->w[tmp][i]] = 1;
+                czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
             }
         }
     }
