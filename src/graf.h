@@ -12,11 +12,13 @@ typedef struct Graf
 	double **w;		 // lista sąsiedstwa dla wierzchołków i wag
 } graph_t;
 
-int sprawdz_integralnosc(graph_t *);   // sprawdza, czy połączenia i wagi w grafie zgadzają się ze sobą (1 - tak, 0 - nie)
-int czy_sasiaduja(int, int, int, int); // sprawdza, czy dwa wierzchołki sąsiadują ze sobą w grafie-siatce (1 - tak, 0 - nie)
-void zainicjalizuj_graf(graph_t *);	   // inicjalizuje zmienne w strukturze na wartości tymczasowe
-int wczytaj_graf(FILE *, graph_t *);   // wczytuje graf z pliku
-void zapisz_graf(FILE *, graph_t *);   // zapisuje graf do pliku
-void zwolnij_graf(graph_t *);		   // zwalnia pamięć po strukturach grafu
+int sprawdz_integralnosc(graph_t *);	   // sprawdza, czy połączenia i wagi w grafie zgadzają się ze sobą (1 - tak, 0 - nie)
+int czy_sasiaduja(int, int, int, int);	   // sprawdza, czy dwa wierzchołki sąsiadują ze sobą w grafie-siatce (1 - tak, 0 - nie)
+void zainicjalizuj_graf(graph_t *);		   // inicjalizuje zmienne w strukturze na wartości tymczasowe
+int wczytaj_graf(FILE *, graph_t *);	   // wczytuje graf z pliku
+void zapisz_graf(FILE *, graph_t *);	   // zapisuje graf do pliku
+void zwolnij_graf(graph_t *);			   // zwalnia pamięć po strukturach grafu
+int znajdz_droge_bfs(graph_t *, int, int); // sprawdza, czy istnieje droga między dwoma wierzchołkami
+void wyznacz_n_siatki(graph_t *);		   // wyznacza liczbę spójnych grafów w siatce
 
 #endif
