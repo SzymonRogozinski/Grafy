@@ -379,7 +379,9 @@ int generuj_graf(graph_t* G,int x, int y, double max, double min, int n) {
        
     }
     if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
-        return 0;
+        int ile = G->n-1;
+        while(ile)
+            ile-=dziel_graf(G);
     }
     return 0; //Jeśli wszystko poprawne
 }
@@ -398,8 +400,40 @@ double losuj(double min,double max) {
 }
 
 //Funkcja dzieląca jeden graf na dwa
-void dziel_graf(graph_t* G) {
-
+int dziel_graf(graph_t* G) {
+    int r,p; //Zmienna losowa
+    int size = 100; //Wielkość zaalokowanej pamięci
+    int n = 0; //Długość ścieżki
+    int* trail;
+    if((trail= malloc(size * sizeof * trail))==NULL)//ścieżka punktów
+        return 0;
+    do //Robi to dopóki, nie wylosuje wierzchołka, który nie ma 4 sąsiadów, ale ma chociaż jednego
+        r = ((int)losuj(0,G->y))*(G->x) + ((int)losuj(0, G->x)); //Losowanie z całego zakresu wierzchołków
+    while (ile_sasiadow(G,r)==4 || ile_sasiadow(G, r) == 0);
+    trail[n++] = r;
+    int i;
+    do {
+        p = G->w[r][(int)losuj(0, ile_sasiadow(G,r))*2];
+        //sprawdzanie, czy wierzchołek się nie powtórzył
+        for(i=0;i<n;i++)
+            if(trail[i]==p)
+                break;
+        //Jeśli nie, dodaje
+        if (i == n){
+            trail[n++] = p;
+            r = p;
+            if (n == size) {
+                size *= 2;
+                if((trail = realloc(trail,size * sizeof * trail))==NULL)
+                    return 0; //Błąd
+            }
+        }
+    } while (ile_sasiadow(G, r) == 4);
+    for (i = 0; i < n; i++)
+        printf("%d: ",trail[i]);
+    printf("\n");
+    free(trail);
+    return 1;
 }
 
 //Liczy ile sąsiadów ma wierzchołek
