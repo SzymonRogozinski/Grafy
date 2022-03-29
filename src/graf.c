@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "graf.h"
+#include "queue.h"
 
 #define MAX_LENGTH 128
 
