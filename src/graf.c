@@ -323,6 +323,11 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
             }
         }
     }
+    
+    tmp = czy_odwiedzono[sp]; // jeżeli odwiedzono SP zaczynąc z ST, to zwraca 1, w przeciwnym wypadku 0
+    free(czy_odwiedzono);
+    free(kolejka->queue);
+    free(kolejka);
 
-    return czy_odwiedzono[sp]; // jeżeli odwiedzono SP zaczynąc z ST, to zwraca 1, w przeciwnym wypadku 0
+    return tmp;
 }
