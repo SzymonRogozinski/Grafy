@@ -28,6 +28,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    wyznacz_n_siatki(G);
+
     printf("X = %d\n", G->x);
     printf("Y = %d\n", G->y);
     printf("MIN = %g\n", G->min);

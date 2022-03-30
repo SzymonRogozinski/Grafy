@@ -151,6 +151,8 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
 
+        wyznacz_n_siatki(gp);
+
         fclose(inf);
     }
     else // generowanie na podstawie danych wejściowych
