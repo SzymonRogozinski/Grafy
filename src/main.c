@@ -137,7 +137,7 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
 
-        if (wczytaj_graf(inf,gp))
+        if (wczytaj_graf(inf, gp))
         {
             fprintf(stderr, "Wystąpił błąd podczas wczytywania pliku wejściowego.\n");
 
@@ -150,6 +150,8 @@ int main(int argc, char **argv)
 
             exit(EXIT_FAILURE);
         }
+
+        wyznacz_n_siatki(gp);
 
         fclose(inf);
     }
@@ -186,6 +188,11 @@ int main(int argc, char **argv)
     }
     // po wygenerowaniu grafu
 
+    if(gp->n != 1) // jeżeli graf nie jest spójny
+    {
+        printf("Wygenerowany graf nie jest spójny. Wyznaczenie drogi między wierzchołkami może być niemożliwe.\n");
+    }
+
     if (out != NULL)
     {
         FILE *ouf = fopen(out, "w+");
@@ -206,6 +213,13 @@ int main(int argc, char **argv)
     if (st >= gp->x * gp->y || sp >= gp->x * gp->y) // wierzchołek ST/SP poza dostępnym zakresem
     {
         fprintf(stderr, "Indeksy wierzchołków ST=%d, SP=%d nie należą do zakresu <0;%d>. Przerywam działanie.\n", st, sp, gp->x * gp->y - 1);
+
+        exit(EXIT_FAILURE);
+    }
+
+    if (znajdz_droge_bfs(gp, st, sp) == 0) // jeżeli nie znaleziono drogi między dwoma wierzchołkami
+    {
+        fprintf(stderr, "Nie udało się znaleźć drogi między wierzchołkami %d i %d. Przerywam działanie.\n", st, sp);
 
         exit(EXIT_FAILURE);
     }

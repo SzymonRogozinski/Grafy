@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "graf.h"
+#include "queue.h"
 
 #define MAX_LENGTH 128
 
@@ -292,4 +293,95 @@ int sprawdz_integralnosc(graph_t *gp)
     }
 
     return 1;
+}
+
+int znajdz_droge_bfs(graph_t *gp, int st, int sp)
+{
+    int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+    queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
+    dodaj_element(kolejka, st);
+    czy_odwiedzono[st] = 1;
+    int tmp;
+
+    while (!czy_pusta(kolejka)) // wykonuj, dopóki w kolejce są elementy
+    {
+        tmp = usun_element(kolejka);
+
+        for (int i = 0; i < 8; i += 2)
+        {
+            if (gp->w[tmp][i] == -1)
+                break;
+
+            if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
+            {
+                if (dodaj_element(kolejka, (int)gp->w[tmp][i]) == 0) // jeżeli nie udało się dodać
+                {
+                    exit(EXIT_FAILURE);
+                }
+
+                czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
+            }
+        }
+    }
+
+    tmp = czy_odwiedzono[sp]; // jeżeli odwiedzono SP zaczynąc z ST, to zwraca 1, w przeciwnym wypadku 0
+    free(czy_odwiedzono);
+    free(kolejka->queue);
+    free(kolejka);
+
+    return tmp;
+}
+
+void wyznacz_n_siatki(graph_t *gp)
+{
+    int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+    queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
+    int w = 0; // wierzchołek od którego zaczynamy szukać
+    gp->n = 0;
+    int czy_szukac = 1; // czy są jeszcze jakieś nieodwiedzone wierzchołki
+    int tmp;
+
+    while (czy_szukac)
+    {
+        czy_szukac = 0;
+        gp->n++;
+
+        dodaj_element(kolejka, w);
+        czy_odwiedzono[w] = 1;
+
+        while (!czy_pusta(kolejka)) // wykonuj, dopóki w kolejce są elementy
+        {
+            tmp = usun_element(kolejka);
+
+            for (int i = 0; i < 8; i += 2)
+            {
+                if (gp->w[tmp][i] == -1)
+                    break;
+
+                if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
+                {
+                    if (dodaj_element(kolejka, (int)gp->w[tmp][i]) == 0) // jeżeli nie udało się dodać
+                    {
+                        exit(EXIT_FAILURE);
+                    }
+
+                    czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
+                }
+            }
+        }
+
+        for (int i = 0; i < gp->x * gp->y; i++)
+        {
+            if (czy_odwiedzono[i] == 0)
+            {
+                czy_szukac = 1;
+                w = i;
+                break;
+            }
+        }
+    }
+
+    free(czy_odwiedzono);
+    free(kolejka->queue);
+    free(kolejka);
 }
