@@ -28,8 +28,8 @@ int main(int argc, char **argv)
     graph_t *gp = malloc(sizeof *gp);
     zainicjalizuj_graf(gp);
 
-    int st = -1; // wierzchołki START - STOP do wyznaczania drogi
-    int sp = -1;
+    int st = DEFAULT_VALUE; // wierzchołki START - STOP do wyznaczania drogi
+    int sp = DEFAULT_VALUE;
 
     while ((opt = getopt(argc, argv, "s:x:y:n:r:f:o:")) != -1)
     {
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (st == -1 || sp == -1)
+    if (st == DEFAULT_VALUE || sp == DEFAULT_VALUE)
     {
         fprintf(stderr, "Nie zdefiniowano wierzchołków, między którymi miałaby zostać wyznaczona droga. Przerywam działanie.\n");
 
@@ -165,22 +165,22 @@ int main(int argc, char **argv)
     }
     else // generowanie na podstawie danych wejściowych
     {
-        if (gp->x == -1)
+        if (gp->x == DEFAULT_VALUE)
         {
             printf("Nie podano parametru: liczba kolumn (X). Używam wartości domyślnej X=%d.\n", DEFAULT_X);
             gp->x = DEFAULT_X;
         }
-        if (gp->y == -1)
+        if (gp->y == DEFAULT_VALUE)
         {
             printf("Nie podano parametru: liczba wierszy (Y). Używam wartości domyślnej Y=%d.\n", DEFAULT_Y);
             gp->y = DEFAULT_Y;
         }
-        if (gp->n == -1)
+        if (gp->n == DEFAULT_VALUE)
         {
             printf("Nie podano parametru: liczba spójnych grafów (N). Używam wartości domyślnej N=%d.\n", DEFAULT_N);
             gp->n = DEFAULT_N;
         }
-        if (gp->min == -1 || gp->max == -1)
+        if (gp->min == DEFAULT_VALUE || gp->max == DEFAULT_VALUE)
         {
             printf("Nie podano parametru: zakres wartości wag (MIN-MAX). Używam wartości domyślnej MIN=%d, MAX=%d.\n", DEFAULT_MIN, DEFAULT_MAX);
             gp->min = DEFAULT_MIN;

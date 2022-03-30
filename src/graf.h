@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#define DEFAULT_VALUE -1
+
 typedef struct Graf
 {
 	int x;			 // liczba kolumn

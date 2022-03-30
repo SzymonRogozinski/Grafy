@@ -5,6 +5,7 @@
 #include "queue.h"
 
 #define MAX_LENGTH 128
+#define LIST_EDGE -1
 
 int czy_sasiaduja(int w1, int w2, int w, int k)
 {
@@ -158,10 +159,10 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (czy_znaleziono) // pomija połączenie, jeśli już jakieś jest dla tego wierzchołka
                 continue;
 
-            if (gp->min == -1 || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
+            if (gp->min == DEFAULT_VALUE || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
                 gp->min = tmp2;
 
-            if (gp->max == -1 || tmp2 > gp->max) // wyznaczanie największej wagi do zakresu
+            if (gp->max == DEFAULT_VALUE || tmp2 > gp->max) // wyznaczanie największej wagi do zakresu
                 gp->max = tmp2;
 
             gp->w[i][edge] = (double)tmp1;
@@ -174,7 +175,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
         if (edge < 8)
         {
-            gp->w[i][edge] = -1;
+            gp->w[i][edge] = LIST_EDGE;
 
             if ((gp->w[i] = realloc(gp->w[i], (edge + 1) * sizeof *gp->w[i])) == NULL)
             {
@@ -191,11 +192,11 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
 void zainicjalizuj_graf(graph_t *gp)
 {
-    gp->x = -1;
-    gp->y = -1;
-    gp->n = -1;
-    gp->min = -1;
-    gp->max = -1;
+    gp->x = DEFAULT_VALUE;
+    gp->y = DEFAULT_VALUE;
+    gp->n = DEFAULT_VALUE;
+    gp->min = DEFAULT_VALUE;
+    gp->max = DEFAULT_VALUE;
     gp->w = NULL;
 }
 
@@ -219,7 +220,7 @@ void zapisz_graf(FILE *ouf, graph_t *gp)
 
         for (int j = 0; j < 8; j += 2) // max zakres indeksów to 0-7
         {
-            if (gp->w[i][j] == -1) // przerywa pętlę, jeżeli nie ma następnego sąsiada
+            if (gp->w[i][j] == LIST_EDGE) // przerywa pętlę, jeżeli nie ma następnego sąsiada
                 break;
 
             fprintf(ouf, "%d :%lf  ", (int)gp->w[i][j], gp->w[i][j + 1]);
@@ -254,7 +255,7 @@ int sprawdz_integralnosc(graph_t *gp)
     {
         for (int i = 0; i < 8; i += 2)
         {
-            if (gp->w[w1][i] == -1)
+            if (gp->w[w1][i] == LIST_EDGE)
                 break;
 
             w2 = gp->w[w1][i];
@@ -263,7 +264,7 @@ int sprawdz_integralnosc(graph_t *gp)
 
             for (int j = 0; j < 8; j += 2) // TODO: jeżeli doszło do 8 i nadal nie znalazło
             {
-                if (gp->w[w2][j] == -1) // jeżeli doszło do końca listy i nie było w1
+                if (gp->w[w2][j] == LIST_EDGE) // jeżeli doszło do końca listy i nie było w1
                 {
                     fprintf(stderr, "Nie znaleziono obustronnego połączenia między wierzchołkami %d i %d. Przerywam działanie.\n", w1, w2);
                     return 0;
@@ -309,7 +310,7 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
 
         for (int i = 0; i < 8; i += 2)
         {
-            if (gp->w[tmp][i] == -1)
+            if (gp->w[tmp][i] == LIST_EDGE)
                 break;
 
             if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
@@ -355,7 +356,7 @@ void wyznacz_n_siatki(graph_t *gp)
 
             for (int i = 0; i < 8; i += 2)
             {
-                if (gp->w[tmp][i] == -1)
+                if (gp->w[tmp][i] == LIST_EDGE)
                     break;
 
                 if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
