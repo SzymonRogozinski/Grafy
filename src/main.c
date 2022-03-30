@@ -145,14 +145,14 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
 
-        if (wczytaj_graf(inf, gp))
+        if (!wczytaj_graf(inf, gp))
         {
             fprintf(stderr, "Wystąpił błąd podczas wczytywania pliku wejściowego.\n");
 
             exit(EXIT_FAILURE);
         }
 
-        if (sprawdz_integralnosc(gp) == 0)
+        if (!sprawdz_integralnosc(gp))
         {
             fprintf(stderr, "Dane w grafie nie są integralne.\n");
 
@@ -225,7 +225,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (znajdz_droge_bfs(gp, st, sp) == 0) // jeżeli nie znaleziono drogi między dwoma wierzchołkami
+    if (!znajdz_droge_bfs(gp, st, sp)) // jeżeli nie znaleziono drogi między dwoma wierzchołkami
     {
         fprintf(stderr, "Nie udało się znaleźć drogi między wierzchołkami %d i %d. Przerywam działanie.\n", st, sp);
 

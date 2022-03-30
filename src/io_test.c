@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     graph_t *G = malloc(sizeof *G);
     zainicjalizuj_graf(G);
 
-    if (wczytaj_graf(F, G) == 1)
+    if (!wczytaj_graf(F, G))
     {
         fprintf(stderr, "Wystąpił błąd podczas wczytywania grafu.\n");
         return 1;
