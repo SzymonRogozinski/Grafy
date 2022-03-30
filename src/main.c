@@ -10,6 +10,14 @@
 #define DEFAULT_MIN 0
 #define DEFAULT_MAX 1
 
+#define PARAM_COLUMN_COUNT 'x'
+#define PARAM_ROW_COUNT 'y'
+#define PARAM_PATH_NODES 's'
+#define PARAM_GRAPH_COUNT 'n'
+#define PARAM_WEIGHT_RANGE 'r'
+#define PARAM_OUTPUT_FILE 'o'
+#define PARAM_INPUT_FILE 'f'
+
 int main(int argc, char **argv)
 {
     int opt;
@@ -27,7 +35,7 @@ int main(int argc, char **argv)
     {
         switch (opt)
         {
-        case 's':
+        case PARAM_PATH_NODES:
             if (sscanf(optarg, "%d,%d", &st, &sp) != 2)
             {
                 fprintf(stderr, "Błędny format wartości argumentu \"-s\" - oczekiwano \"<st>,<sp>\". Przerywam działanie.\n");
@@ -43,7 +51,7 @@ int main(int argc, char **argv)
             }
 
             break;
-        case 'r':
+        case PARAM_WEIGHT_RANGE:
             byParam = 1;
 
             if (sscanf(optarg, "%lf-%lf", &gp->min, &gp->max) != 2)
@@ -60,7 +68,7 @@ int main(int argc, char **argv)
                 exit(EXIT_FAILURE);
             }
             break;
-        case 'x':
+        case PARAM_COLUMN_COUNT:
             byParam = 1;
             gp->x = atoi(optarg);
 
@@ -71,7 +79,7 @@ int main(int argc, char **argv)
             }
 
             break;
-        case 'y':
+        case PARAM_ROW_COUNT:
             byParam = 1;
             gp->y = atoi(optarg);
 
@@ -82,7 +90,7 @@ int main(int argc, char **argv)
             }
 
             break;
-        case 'n':
+        case PARAM_GRAPH_COUNT:
             byParam = 1;
             gp->n = atoi(optarg);
 
@@ -93,10 +101,10 @@ int main(int argc, char **argv)
             }
 
             break;
-        case 'f':
+        case PARAM_INPUT_FILE:
             in = optarg;
             break;
-        case 'o':
+        case PARAM_OUTPUT_FILE:
             out = optarg;
             break;
         default:
