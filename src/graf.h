@@ -24,7 +24,7 @@ int znajdz_droge_bfs(graph_t *, int, int); // sprawdza, czy istnieje droga międ
 void wyznacz_n_siatki(graph_t *);		   // wyznacza liczbę spójnych grafów w siatce
 void znajdz_droge(graph_t *, int, int);	   // wyznacza najkrótszą drogę między dwoma wierzchołkami
 void wyswietl_sciezke(int *, int);		   // wyświetla ścieżkę poprzedników
-int generuj_graf(graph_t *,int, int, double, double, int);	//Generuje graf o podanych parametrach
+int generuj_graf(graph_t *);	//Generuje graf o podanych parametrach
 int szukaj_wierzcholek(int, int, graph_t*);		//Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
 double losuj(double,double);		//Losuje liczbę z podanego zakresu
 int dziel_graf(graph_t*);			//Funkcja dzieląca jeden graf na dwa
