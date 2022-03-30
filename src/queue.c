@@ -48,3 +48,10 @@ int czy_pusta(queue_t *kolejka)
 {
     return kolejka->n == 0;
 }
+
+void zrestartuj_kolejke(queue_t *kolejka)
+{
+    kolejka->n = 0;
+    kolejka->front = 0;
+    kolejka->end = -1;
+}
