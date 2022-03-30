@@ -314,17 +314,8 @@ int sprawdz_integralnosc(graph_t *gp)
     return 1;
 }
 
-int generuj_graf(graph_t* G,int x, int y, double max, double min, int n) {
+int generuj_graf(graph_t* G) {
     srand(time(NULL));
-    if (x < 1 || y < 1 || n<1 || min <= 0 || max <= 0 || min>max) //Czy dane są poprawne
-        return 0;
-    //Wczytywanie danych
-    G->x = x;
-    G->y = y;
-    G->max = max;
-    G->min = min;
-    G->n = n;
-    G->w = malloc(G->x * G->y * sizeof * G->w);
     if (G->w == NULL)
         return 1;
     for (int i = 0; i < G->x * G->y;i++) {
@@ -429,6 +420,30 @@ int dziel_graf(graph_t* G) {
             }
         }
     } while (ile_sasiadow(G, r) == 4);
+    if (n==2) { //Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
+        if (ile_sasiadow(G,trail[0]) + ile_sasiadow(G,trail[1])==2) { //Wierzchołki są połączone tylko ze sobą
+            G->w[trail[0]][0]=-1.0;
+            G->w[trail[1]][0] = -1.0;
+            if ((G->w[trail[0]]=realloc(G->w[trail[0]], 1 * sizeof * G->w[0]))==NULL || (G->w[trail[1]] = realloc(G->w[trail[1]], 1 * sizeof * G->w[1])) == NULL)
+                return;
+        }
+        else{
+            //Sprawdzanie połączeń
+            for (i = 0; i < 2; i++) {
+                for (int j=0;j<ile_sasiadow(G, trail[i]);j++) {
+                    if (ile_sasiadow(G, G->w[trail[i]][j * 2])==1) {//Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
+                        G->w[trail[i]][j*2] = -1.0;
+                        G->w[trail[1]][0] = -1.0;
+                        if ((G->w[trail[0]] = realloc(G->w[trail[0]], 1 * sizeof * G->w[0])) == NULL || (G->w[trail[1]] = realloc(G->w[trail[1]], 1 * sizeof * G->w[1])) == NULL)
+                            return;
+                        i = 3;
+                        break;
+                    }
+                }
+            }
+            //Oderwanie tych dwóch wierzchołków nie spowoduje podzielenia grafu na więcej niż 2
+        }
+    }
     for (i = 0; i < n; i++)
         printf("%d: ",trail[i]);
     printf("\n");
