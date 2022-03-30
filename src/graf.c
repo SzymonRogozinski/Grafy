@@ -421,24 +421,14 @@ int dziel_graf(graph_t* G) {
         }
     } while (ile_sasiadow(G, r) == 4);
     if (n==2) { //Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
-        if (ile_sasiadow(G,trail[0]) + ile_sasiadow(G,trail[1])==2) { //Wierzchołki są połączone tylko ze sobą
-            G->w[trail[0]][0]=-1.0;
-            G->w[trail[1]][0] = -1.0;
-            if ((G->w[trail[0]]=realloc(G->w[trail[0]], 1 * sizeof * G->w[0]))==NULL || (G->w[trail[1]] = realloc(G->w[trail[1]], 1 * sizeof * G->w[1])) == NULL)
-                return;
-        }
+        if (ile_sasiadow(G,trail[0]) + ile_sasiadow(G,trail[1])==2) //Wierzchołki są połączone tylko ze sobą
+            return zerwanie_polaczenia(G, trail[0],trail[1]);
         else{
             //Sprawdzanie połączeń
             for (i = 0; i < 2; i++) {
                 for (int j=0;j<ile_sasiadow(G, trail[i]);j++) {
-                    if (ile_sasiadow(G, G->w[trail[i]][j * 2])==1) {//Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                        G->w[trail[i]][j*2] = -1.0;
-                        G->w[trail[1]][0] = -1.0;
-                        if ((G->w[trail[0]] = realloc(G->w[trail[0]], 1 * sizeof * G->w[0])) == NULL || (G->w[trail[1]] = realloc(G->w[trail[1]], 1 * sizeof * G->w[1])) == NULL)
-                            return;
-                        i = 3;
-                        break;
-                    }
+                    if (ile_sasiadow(G, G->w[trail[i]][j * 2])==1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
+                        return zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
                 }
             }
             //Oderwanie tych dwóch wierzchołków nie spowoduje podzielenia grafu na więcej niż 2
@@ -449,6 +439,28 @@ int dziel_graf(graph_t* G) {
     printf("\n");
     free(trail);
     return 1;
+}
+//Funkcja zrywa połączenie miedzy dwoma wierzchołkami
+int zerwanie_polaczenia(graph_t* G,int q,int p) {
+    int x, y; //Indeksy połączeń
+    int n, m; //Liczba sąsiadów
+    x = szukaj_wierzcholek(q,p,G);
+    y = szukaj_wierzcholek(p, q, G);
+    if (x<0 || y<0) 
+        return 0;
+    n = ile_sasiadow(G, q);
+    m = ile_sasiadow(G, p);
+    //Przesuwanie tablicy wierzchołka q
+    for (int i=x+2;i<=n;i+=2) {
+        G->w[q][x] = G->w[q][i];
+        G->w[q][x+1] = G->w[q][i+1];
+    }
+    //Przesuwanie tablicy wierzchołka p
+    for (int i = x + 2; i <= m; i += 2) {
+        G->w[p][x] = G->w[p][i];
+        G->w[p][x + 1] = G->w[p][i + 1];
+    }
+    return (G->w[q]=realloc(G->w[q],(n-2)*sizeof*G->w[q]))==NULL || (G->w[p] = realloc(G->w[p], (m-2) * sizeof * G->w[p])) == NULL;
 }
 
 //Liczy ile sąsiadów ma wierzchołek
