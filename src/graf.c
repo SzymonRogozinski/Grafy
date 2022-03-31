@@ -5,6 +5,7 @@
 #include "queue.h"
 
 #define MAX_LENGTH 128
+#define LIST_EDGE -1
 
 int czy_sasiaduja(int w1, int w2, int w, int k)
 {
@@ -13,14 +14,9 @@ int czy_sasiaduja(int w1, int w2, int w, int k)
     int col1 = w1 % k + 1;
     int col2 = w2 % k + 1;
 
-    if (abs(row1 - row2) == 1 || abs(col1 - col2) == 1)
-        return 1;
-
-    return 0;
+    return (abs(row1 - row2) == 1 || abs(col1 - col2) == 1);
 }
 
-// TODO: walidacja danych
-// - liczba spójnych grafów
 int wczytaj_graf(FILE *inf, graph_t *gp)
 {
     char buf[MAX_LENGTH]; // bufor
@@ -38,13 +34,13 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (sscanf(buf, "%d %d\n", &gp->y, &gp->x) != 2)
         {
             fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
-            return 1;
+            return 0;
         }
     }
     else
     {
         fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
-        return 1;
+        return 0;
     }
 
     if (gp->y <= 0 || gp->x <= 0) // warunek X > 0, Y > 0
@@ -55,13 +51,13 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (gp->x <= 0)
             fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", gp->x);
 
-        return 1;
+        return 0;
     }
 
     if ((gp->w = malloc(gp->y * gp->x * sizeof *gp->w)) == NULL) // alokowanie pamięci na wierzchołki
     {
         fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa. Przerywam działanie.\n");
-        return 1;
+        return 0;
     }
 
     for (int i = 0; i < gp->y * gp->x; i++)
@@ -69,13 +65,13 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (fgets(buf, MAX_LENGTH, inf) == NULL)
         {
             fprintf(stderr, "Nie udało się wczytać listy sąsiedstwa dla wierzchołka %d. Przerywam działanie\n", i);
-            return 1;
+            return 0;
         }
 
         if ((gp->w[i] = malloc(8 * sizeof *gp->w[i])) == NULL) // czy udało się zaalokować pamięć dla 1 wierzchołka
         {
             fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa dla wierzchołka %d. Przerywam działanie.\n", i);
-            return 1;
+            return 0;
         }
 
         counter = 0;
@@ -94,7 +90,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (strstream == NULL)
         {
             fprintf(stderr, "Nie udało się wczytać listy sąsiedstwa dla wierzchołka %d. Przerywam działanie\n", i);
-            return 1;
+            return 0;
         }
 
         edge = 0;
@@ -109,7 +105,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (fscanf(strstream, "%d", &tmp1) != 1)
             {
                 fprintf(stderr, "Linia %d: Nie udało się wczytać numeru wierzchołka. Przerywam działanie.\n", i + 2);
-                return 1;
+                return 0;
             }
 
             if (tmp1 < 0 || tmp1 >= gp->x * gp->y) // poza zakresem <0;liczba wierzchołków)
@@ -118,7 +114,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
                 continue;
             }
 
-            if (czy_sasiaduja(i, tmp1, gp->y, gp->x) == 0) // sprawdza, czy mogą ze sobą sąsiadować
+            if (!czy_sasiaduja(i, tmp1, gp->y, gp->x)) // sprawdza, czy mogą ze sobą sąsiadować
             {
                 fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
                 continue;
@@ -130,13 +126,13 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (ch != ':') // zły format, nie ma ':' po whitespace
             {
                 fprintf(stderr, "Linia %d: Błędny format pliku - wykryto znak \'%c\'. Przerywam działanie.\n", i + 2, ch);
-                return 1;
+                return 0;
             }
 
             if (fscanf(strstream, "%lf", &tmp2) != 1)
             {
                 fprintf(stderr, "Linia %d: Nie udało się wczytać wartości wagi. Przerywam działanie.\n", i + 2);
-                return 1;
+                return 0;
             }
 
             if (tmp2 <= 0) // waga <= 0
@@ -158,10 +154,10 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (czy_znaleziono) // pomija połączenie, jeśli już jakieś jest dla tego wierzchołka
                 continue;
 
-            if (gp->min == -1 || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
+            if (gp->min == DEFAULT_VALUE || tmp2 < gp->min) // wyznaczanie najmniejszej wagi do zakresu
                 gp->min = tmp2;
 
-            if (gp->max == -1 || tmp2 > gp->max) // wyznaczanie największej wagi do zakresu
+            if (gp->max == DEFAULT_VALUE || tmp2 > gp->max) // wyznaczanie największej wagi do zakresu
                 gp->max = tmp2;
 
             gp->w[i][edge] = (double)tmp1;
@@ -174,28 +170,28 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
         if (edge < 8)
         {
-            gp->w[i][edge] = -1;
+            gp->w[i][edge] = LIST_EDGE;
 
             if ((gp->w[i] = realloc(gp->w[i], (edge + 1) * sizeof *gp->w[i])) == NULL)
             {
                 fprintf(stderr, "Nie udało się realokować pamięci na listę. Przerywam działanie.\n");
-                return 1;
+                return 0;
             }
         }
 
         fclose(strstream);
     }
 
-    return 0;
+    return 1;
 }
 
 void zainicjalizuj_graf(graph_t *gp)
 {
-    gp->x = -1;
-    gp->y = -1;
-    gp->n = -1;
-    gp->min = -1;
-    gp->max = -1;
+    gp->x = DEFAULT_VALUE;
+    gp->y = DEFAULT_VALUE;
+    gp->n = DEFAULT_VALUE;
+    gp->min = DEFAULT_VALUE;
+    gp->max = DEFAULT_VALUE;
     gp->w = NULL;
 }
 
@@ -219,7 +215,7 @@ void zapisz_graf(FILE *ouf, graph_t *gp)
 
         for (int j = 0; j < 8; j += 2) // max zakres indeksów to 0-7
         {
-            if (gp->w[i][j] == -1) // przerywa pętlę, jeżeli nie ma następnego sąsiada
+            if (gp->w[i][j] == LIST_EDGE) // przerywa pętlę, jeżeli nie ma następnego sąsiada
                 break;
 
             fprintf(ouf, "%d :%lf  ", (int)gp->w[i][j], gp->w[i][j + 1]);
@@ -254,7 +250,7 @@ int sprawdz_integralnosc(graph_t *gp)
     {
         for (int i = 0; i < 8; i += 2)
         {
-            if (gp->w[w1][i] == -1)
+            if (gp->w[w1][i] == LIST_EDGE)
                 break;
 
             w2 = gp->w[w1][i];
@@ -263,7 +259,7 @@ int sprawdz_integralnosc(graph_t *gp)
 
             for (int j = 0; j < 8; j += 2) // TODO: jeżeli doszło do 8 i nadal nie znalazło
             {
-                if (gp->w[w2][j] == -1) // jeżeli doszło do końca listy i nie było w1
+                if (gp->w[w2][j] == LIST_EDGE) // jeżeli doszło do końca listy i nie było w1
                 {
                     fprintf(stderr, "Nie znaleziono obustronnego połączenia między wierzchołkami %d i %d. Przerywam działanie.\n", w1, w2);
                     return 0;
@@ -309,12 +305,12 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
 
         for (int i = 0; i < 8; i += 2)
         {
-            if (gp->w[tmp][i] == -1)
+            if (gp->w[tmp][i] == LIST_EDGE)
                 break;
 
-            if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
+            if (!czy_odwiedzono[(int)gp->w[tmp][i]])
             {
-                if (dodaj_element(kolejka, (int)gp->w[tmp][i]) == 0) // jeżeli nie udało się dodać
+                if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
                 {
                     exit(EXIT_FAILURE);
                 }
@@ -355,12 +351,12 @@ void wyznacz_n_siatki(graph_t *gp)
 
             for (int i = 0; i < 8; i += 2)
             {
-                if (gp->w[tmp][i] == -1)
+                if (gp->w[tmp][i] == LIST_EDGE)
                     break;
 
-                if (czy_odwiedzono[(int)gp->w[tmp][i]] == 0)
+                if (!czy_odwiedzono[(int)gp->w[tmp][i]])
                 {
-                    if (dodaj_element(kolejka, (int)gp->w[tmp][i]) == 0) // jeżeli nie udało się dodać
+                    if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
                     {
                         exit(EXIT_FAILURE);
                     }
@@ -372,7 +368,7 @@ void wyznacz_n_siatki(graph_t *gp)
 
         for (int i = 0; i < gp->x * gp->y; i++)
         {
-            if (czy_odwiedzono[i] == 0)
+            if (!czy_odwiedzono[i])
             {
                 czy_szukac = 1;
                 w = i;

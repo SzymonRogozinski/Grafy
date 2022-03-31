@@ -46,7 +46,7 @@ int usun_element(queue_t *kolejka)
 
 int czy_pusta(queue_t *kolejka)
 {
-    return kolejka->n == 0;
+    return (kolejka->n == 0);
 }
 
 void zrestartuj_kolejke(queue_t *kolejka)
