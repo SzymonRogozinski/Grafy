@@ -397,7 +397,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
 {
     int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
     queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
-    prqueue_t *kolejka_prio = zainicjalizuj_kolejke_prio(gp->x * gp->y);
+    prqueue_t *kolejka_prio = zainicjalizuj_kolejke_pr(gp->x * gp->y);
 
     dodaj_element(kolejka, st);
     czy_odwiedzono[st] = 1;

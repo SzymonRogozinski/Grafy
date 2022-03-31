@@ -3,7 +3,7 @@
 
 #include "prqueue.h"
 
-prqueue_t *zainicjalizuj_kolejke(int rozmiar)
+prqueue_t *zainicjalizuj_kolejke_pr(int rozmiar)
 {
     prqueue_t *kolejka = malloc(sizeof *kolejka);
     kolejka->n = 0;
