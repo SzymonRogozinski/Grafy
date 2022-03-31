@@ -3,6 +3,7 @@
 
 #include "graf.h"
 #include "queue.h"
+#include "prqueue.h"
 
 #define MAX_LENGTH 128
 #define LIST_EDGE -1
