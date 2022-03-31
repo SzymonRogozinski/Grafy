@@ -13,7 +13,7 @@ prqueue_t *zainicjalizuj_kolejke(int rozmiar)
     return kolejka;
 }
 
-int dodaj_element(prqueue_t *kolejka, int el)
+int dodaj_element_pr(prqueue_t *kolejka, int el)
 {
     if (kolejka->n == kolejka->size) // jeżeli kolejka jest pełna, to przerwij działanie
     {
@@ -27,9 +27,9 @@ int dodaj_element(prqueue_t *kolejka, int el)
     return 1;
 }
 
-int usun_element(prqueue_t *kolejka, double *dyst)
+int usun_element_pr(prqueue_t *kolejka, double *dyst)
 {
-    if (czy_pusta(kolejka))
+    if (czy_pusta_pr(kolejka))
     {
         fprintf(stderr, "Kolejka jest pusta, nie można wyjąć żadnych elementów.\n");
         return -1;
@@ -55,7 +55,7 @@ int usun_element(prqueue_t *kolejka, double *dyst)
     return num;
 }
 
-int czy_pusta(prqueue_t *kolejka)
+int czy_pusta_pr(prqueue_t *kolejka)
 {
     return (kolejka->n == 0);
 }
