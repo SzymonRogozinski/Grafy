@@ -382,3 +382,95 @@ void wyznacz_n_siatki(graph_t *gp)
     free(kolejka->queue);
     free(kolejka);
 }
+
+void wyswietl_sciezke(int *poprzednik, int w)
+{
+    if (poprzednik[w] == -1) // jeżeli nie ma dalej poprzedników, to skończ działanie
+        return;
+
+    wyswietl_sciezke(poprzednik, poprzednik[w]);
+
+    printf("%d ", w);
+}
+
+void znajdz_droge(graph_t *gp, int st, int sp)
+{
+    int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+    queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
+    prqueue_t *kolejka_prio = zainicjalizuj_kolejke_prio(gp->x * gp->y);
+
+    dodaj_element(kolejka, st);
+    czy_odwiedzono[st] = 1;
+    int tmp, tmp2;
+
+    while (!czy_pusta(kolejka)) // wykonuj, dopóki w kolejce są elementy
+    {
+        tmp = usun_element(kolejka);
+
+        for (int i = 0; i < 8; i += 2)
+        {
+            if (gp->w[tmp][i] == LIST_EDGE)
+                break;
+
+            if (!czy_odwiedzono[(int)gp->w[tmp][i]])
+            {
+                if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
+                {
+                    exit(EXIT_FAILURE);
+                }
+
+                czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < gp->x * gp->y; i++)
+        if (czy_odwiedzono[i]) // jeżeli odwiedzono w tym podgrafie, to dodaj do kolejki priorytetowej
+            dodaj_element_pr(kolejka_prio, i);
+
+    free(czy_odwiedzono);
+    free(kolejka->queue);
+    free(kolejka);
+
+    // teraz w kolejce są wszystkie wierzchołki z podgrafu, to można szukać Dijkstrą
+
+    double *dyst = malloc((gp->x * gp->y) * sizeof *dyst);    // odległość wierzchołków od ST
+    int *poprzednik = malloc((gp->x * gp->y) * sizeof *dyst); // przechowuje poprzednika do wyznaczenia drogi
+
+    for (int i = 0; i < gp->x * gp->y; i++)
+    {
+        dyst[i] = DBL_MAX; // ustawiamy odległości dla wszystkich wierzchołków jako "nieskończoność"
+    }
+
+    dyst[st] = 0;        // dystans ST od ST jest równy 0
+    poprzednik[st] = -1; // nie ma poprzednika
+
+    while (!czy_pusta_pr(kolejka_prio))
+    {
+        tmp = usun_element_pr(kolejka_prio, dyst);
+
+        for (int i = 0; i < 8; i++)
+        {
+            tmp2 = (int)gp->w[tmp][i]; // indeks sprawdzanego sąsiada
+
+            if (tmp2 == -1)
+                break;
+
+            if (dyst[tmp] + gp->w[tmp][i + 1] < dyst[tmp2])
+            {
+                dyst[tmp2] = dyst[tmp] + gp->w[tmp][i + 1];
+                poprzednik[tmp2] = tmp;
+            }
+        }
+    }
+
+    printf("Długość najkrótszej ścieżki między %d i %d: %g\n", st, sp, dyst[sp]);
+    printf("Droga: ");
+    wyswietl_sciezke(poprzednik, sp);
+    printf("\n");
+
+    free(dyst);
+    free(poprzednik);
+    free(kolejka_prio->queue);
+    free(kolejka_prio);
+}
