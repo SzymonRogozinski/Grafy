@@ -385,7 +385,7 @@ void wyznacz_n_siatki(graph_t *gp)
 
 void wyswietl_sciezke(int *poprzednik, int w)
 {
-    if (poprzednik[w] != -1) // dopóki są poprzednicy to idź dalej do tyłu
+    if (poprzednik[w] != DEFAULT_VALUE) // dopóki są poprzednicy to idź dalej do tyłu
         wyswietl_sciezke(poprzednik, poprzednik[w]);
 
     printf("%d ", w);
@@ -442,7 +442,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
     }
 
     dyst[st] = 0;        // dystans ST od ST jest równy 0
-    poprzednik[st] = -1; // nie ma poprzednika
+    poprzednik[st] = DEFAULT_VALUE; // nie ma poprzednika
 
     while (!czy_pusta_pr(kolejka_prio))
     {
@@ -453,7 +453,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
         {
             tmp2 = (int)gp->w[tmp][i]; // indeks sprawdzanego sąsiada
 
-            if (tmp2 == -1)
+            if (tmp2 == LIST_EDGE)
                 break;
 
             if (!czy_przetworzono[tmp2] && (dyst[tmp] + gp->w[tmp][i + 1] < dyst[tmp2]))
