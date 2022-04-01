@@ -473,6 +473,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
 
     free(dyst);
     free(poprzednik);
+    free(czy_przetworzono);
     free(kolejka_prio->queue);
     free(kolejka_prio);
 }
