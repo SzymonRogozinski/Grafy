@@ -432,17 +432,17 @@ void znajdz_droge(graph_t *gp, int st, int sp)
 
     // teraz w kolejce są wszystkie wierzchołki z podgrafu, to można szukać Dijkstrą
 
-    double *dyst = malloc((gp->x * gp->y) * sizeof *dyst);    // odległość wierzchołków od ST
-    int *poprzednik = malloc((gp->x * gp->y) * sizeof *dyst); // przechowuje poprzednika do wyznaczenia drogi
-    int *czy_przetworzono = calloc(gp->x * gp->y, sizeof *czy_przetworzono);
+    double *dyst = malloc((gp->x * gp->y) * sizeof *dyst);                   // odległość wierzchołków od ST
+    int *poprzednik = malloc((gp->x * gp->y) * sizeof *dyst);                // przechowuje poprzednika do wyznaczenia drogi
+    int *czy_przetworzono = calloc(gp->x * gp->y, sizeof *czy_przetworzono); // określa, czy dany wierzchołek został już przetworzony; 0 - nie, 1 - tak
 
     for (int i = 0; i < gp->x * gp->y; i++)
     {
         dyst[i] = DBL_MAX; // ustawiamy odległości dla wszystkich wierzchołków jako "nieskończoność"
     }
 
-    dyst[st] = 0;        // dystans ST od ST jest równy 0
-    poprzednik[st] = DEFAULT_VALUE; // nie ma poprzednika
+    dyst[st] = 0;                   // dystans ST od ST jest równy 0
+    poprzednik[st] = DEFAULT_VALUE; // i nie ma on poprzednika
 
     while (!czy_pusta_pr(kolejka_prio))
     {
