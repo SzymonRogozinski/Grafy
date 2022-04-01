@@ -205,7 +205,7 @@ int main(int argc, char **argv)
     }
     // po wygenerowaniu grafu
 
-    if(gp->n != 1) // jeżeli graf nie jest spójny
+    if (gp->n != 1) // jeżeli graf nie jest spójny
     {
         printf("Wygenerowany graf nie jest spójny. Wyznaczenie drogi między wierzchołkami może być niemożliwe.\n");
     }
@@ -240,6 +240,8 @@ int main(int argc, char **argv)
 
         return -5;
     }
+
+    znajdz_droge(gp, st, sp);
 
     if (gp != NULL)
     {

@@ -3,6 +3,7 @@
 
 #include "graf.h"
 #include "queue.h"
+#include "prqueue.h"
 
 #define MAX_LENGTH 128
 #define LIST_EDGE -1
@@ -380,4 +381,97 @@ void wyznacz_n_siatki(graph_t *gp)
     free(czy_odwiedzono);
     free(kolejka->queue);
     free(kolejka);
+}
+
+void wyswietl_sciezke(int *poprzednik, int w)
+{
+    if (poprzednik[w] != DEFAULT_VALUE) // dopóki są poprzednicy to idź dalej do tyłu
+        wyswietl_sciezke(poprzednik, poprzednik[w]);
+
+    printf("%d ", w);
+}
+
+void znajdz_droge(graph_t *gp, int st, int sp)
+{
+    int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+    queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
+    prqueue_t *kolejka_prio = zainicjalizuj_kolejke_pr(gp->x * gp->y);
+
+    dodaj_element(kolejka, st);
+    czy_odwiedzono[st] = 1;
+    int tmp, tmp2;
+
+    while (!czy_pusta(kolejka)) // wykonuj, dopóki w kolejce są elementy
+    {
+        tmp = usun_element(kolejka);
+
+        for (int i = 0; i < 8; i += 2)
+        {
+            if (gp->w[tmp][i] == LIST_EDGE)
+                break;
+
+            if (!czy_odwiedzono[(int)gp->w[tmp][i]])
+            {
+                if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
+                {
+                    exit(EXIT_FAILURE);
+                }
+
+                czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < gp->x * gp->y; i++)
+        if (czy_odwiedzono[i]) // jeżeli odwiedzono w tym podgrafie, to dodaj do kolejki priorytetowej
+            dodaj_element_pr(kolejka_prio, i);
+
+    free(czy_odwiedzono);
+    free(kolejka->queue);
+    free(kolejka);
+
+    // teraz w kolejce są wszystkie wierzchołki z podgrafu, to można szukać Dijkstrą
+
+    double *dyst = malloc((gp->x * gp->y) * sizeof *dyst);                   // odległość wierzchołków od ST
+    int *poprzednik = malloc((gp->x * gp->y) * sizeof *dyst);                // przechowuje poprzednika do wyznaczenia drogi
+    int *czy_przetworzono = calloc(gp->x * gp->y, sizeof *czy_przetworzono); // określa, czy dany wierzchołek został już przetworzony; 0 - nie, 1 - tak
+
+    for (int i = 0; i < gp->x * gp->y; i++)
+    {
+        dyst[i] = DBL_MAX; // ustawiamy odległości dla wszystkich wierzchołków jako "nieskończoność"
+    }
+
+    dyst[st] = 0;                   // dystans ST od ST jest równy 0
+    poprzednik[st] = DEFAULT_VALUE; // i nie ma on poprzednika
+
+    while (!czy_pusta_pr(kolejka_prio))
+    {
+        tmp = usun_element_pr(kolejka_prio, dyst);
+        czy_przetworzono[tmp] = 1;
+
+        for (int i = 0; i < 8; i += 2)
+        {
+            tmp2 = (int)gp->w[tmp][i]; // indeks sprawdzanego sąsiada
+
+            if (tmp2 == LIST_EDGE)
+                break;
+
+            if (!czy_przetworzono[tmp2] && (dyst[tmp] + gp->w[tmp][i + 1] < dyst[tmp2]))
+            {
+                dyst[tmp2] = dyst[tmp] + gp->w[tmp][i + 1];
+                poprzednik[tmp2] = tmp;
+            }
+        }
+    }
+
+    printf("Długość najkrótszej ścieżki między %d i %d: %g\n", st, sp, dyst[sp]);
+    printf("Droga: ");
+    wyswietl_sciezke(poprzednik, sp);
+    printf("\n");
+
+    free(dyst);
+    free(poprzednik);
+    free(czy_przetworzono);
+    free(kolejka_prio->queue);
+    free(kolejka_prio);
 }
