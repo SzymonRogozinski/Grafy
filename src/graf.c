@@ -451,7 +451,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
         tmp = usun_element_pr(kolejka_prio, dyst);
         czy_przetworzono[tmp] = 1;
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i += 2)
         {
             tmp2 = (int)gp->w[tmp][i]; // indeks sprawdzanego sąsiada
 
