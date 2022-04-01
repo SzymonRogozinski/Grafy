@@ -385,10 +385,8 @@ void wyznacz_n_siatki(graph_t *gp)
 
 void wyswietl_sciezke(int *poprzednik, int w)
 {
-    if (poprzednik[w] == -1) // jeżeli nie ma dalej poprzedników, to skończ działanie
-        return;
-
-    wyswietl_sciezke(poprzednik, poprzednik[w]);
+    if (poprzednik[w] != -1) // dopóki są poprzednicy to idź dalej do tyłu
+        wyswietl_sciezke(poprzednik, poprzednik[w]);
 
     printf("%d ", w);
 }
