@@ -436,6 +436,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
 
     double *dyst = malloc((gp->x * gp->y) * sizeof *dyst);    // odległość wierzchołków od ST
     int *poprzednik = malloc((gp->x * gp->y) * sizeof *dyst); // przechowuje poprzednika do wyznaczenia drogi
+    int *czy_przetworzono = calloc(gp->x * gp->y, sizeof *czy_przetworzono);
 
     for (int i = 0; i < gp->x * gp->y; i++)
     {
@@ -448,6 +449,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
     while (!czy_pusta_pr(kolejka_prio))
     {
         tmp = usun_element_pr(kolejka_prio, dyst);
+        czy_przetworzono[tmp] = 1;
 
         for (int i = 0; i < 8; i++)
         {
@@ -456,7 +458,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
             if (tmp2 == -1)
                 break;
 
-            if (dyst[tmp] + gp->w[tmp][i + 1] < dyst[tmp2])
+            if (!czy_przetworzono[tmp2] && (dyst[tmp] + gp->w[tmp][i + 1] < dyst[tmp2]))
             {
                 dyst[tmp2] = dyst[tmp] + gp->w[tmp][i + 1];
                 poprzednik[tmp2] = tmp;
