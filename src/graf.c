@@ -4,6 +4,7 @@
 #include "graf.h"
 #include "queue.h"
 #include "prqueue.h"
+#include "errors.h"
 
 #define MAX_LENGTH 128
 #define LIST_EDGE -1
@@ -35,13 +36,13 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (sscanf(buf, "%d %d\n", &gp->y, &gp->x) != 2)
         {
             fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
-            return 0;
+            return ERROR_READ_DIMENSIONS;
         }
     }
     else
     {
         fprintf(stderr, "Nie udało się wczytać wymiarów grafu. Przerywam działanie.\n");
-        return 0;
+        return ERROR_READ_DIMENSIONS;
     }
 
     if (gp->y <= 0 || gp->x <= 0) // warunek X > 0, Y > 0
@@ -52,13 +53,14 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (gp->x <= 0)
             fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", gp->x);
 
-        return 0;
+        return ERROR_NEG_DIMENSIONS;
     }
 
     if ((gp->w = malloc(gp->y * gp->x * sizeof *gp->w)) == NULL) // alokowanie pamięci na wierzchołki
     {
         fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa. Przerywam działanie.\n");
-        return 0;
+
+        return ERROR_ALLOC_GRAPH_LIST;
     }
 
     for (int i = 0; i < gp->y * gp->x; i++)
@@ -66,13 +68,14 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (fgets(buf, MAX_LENGTH, inf) == NULL)
         {
             fprintf(stderr, "Nie udało się wczytać listy sąsiedstwa dla wierzchołka %d. Przerywam działanie\n", i);
-            return 0;
+            return ERROR_READ_LIST;
         }
 
         if ((gp->w[i] = malloc(8 * sizeof *gp->w[i])) == NULL) // czy udało się zaalokować pamięć dla 1 wierzchołka
         {
             fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa dla wierzchołka %d. Przerywam działanie.\n", i);
-            return 0;
+
+            return ERROR_ALLOC_NODE_LIST;
         }
 
         counter = 0;
@@ -83,7 +86,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
         if (counter > 4)
         {
-            fprintf(stderr, "W linii znajduje się powyżej 4 sąsiadujących wierzchołków: %d. Dane powyżej limitu zostaną pominięte.\n", counter);
+            fprintf(stderr, "Linia %d: W linii znajduje się powyżej 4 sąsiadujących wierzchołków: %d. Dane powyżej limitu zostaną pominięte.\n", i + 2, counter);
         }
 
         strstream = fmemopen(buf, strlen(buf), "r");
@@ -91,7 +94,8 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         if (strstream == NULL)
         {
             fprintf(stderr, "Nie udało się wczytać listy sąsiedstwa dla wierzchołka %d. Przerywam działanie\n", i);
-            return 0;
+
+            return ERROR_READ_LIST;
         }
 
         edge = 0;
@@ -106,7 +110,8 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (fscanf(strstream, "%d", &tmp1) != 1)
             {
                 fprintf(stderr, "Linia %d: Nie udało się wczytać numeru wierzchołka. Przerywam działanie.\n", i + 2);
-                return 0;
+
+                return ERROR_BAD_LIST_FORMAT;
             }
 
             if (tmp1 < 0 || tmp1 >= gp->x * gp->y) // poza zakresem <0;liczba wierzchołków)
@@ -117,7 +122,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
             if (!czy_sasiaduja(i, tmp1, gp->y, gp->x)) // sprawdza, czy mogą ze sobą sąsiadować
             {
-                fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
+                fprintf(stderr, "Linia %d: Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i + 2, i, tmp1);
                 continue;
             }
 
@@ -127,13 +132,15 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             if (ch != ':') // zły format, nie ma ':' po whitespace
             {
                 fprintf(stderr, "Linia %d: Błędny format pliku - wykryto znak \'%c\'. Przerywam działanie.\n", i + 2, ch);
-                return 0;
+
+                return ERROR_BAD_LIST_FORMAT;
             }
 
             if (fscanf(strstream, "%lf", &tmp2) != 1)
             {
                 fprintf(stderr, "Linia %d: Nie udało się wczytać wartości wagi. Przerywam działanie.\n", i + 2);
-                return 0;
+
+                return ERROR_BAD_LIST_FORMAT;
             }
 
             if (tmp2 <= 0) // waga <= 0
@@ -146,7 +153,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             {
                 if (tmp1 == wierz[wi]) // jeżeli w tej linii już był ten wierzchołek
                 {
-                    fprintf(stderr, "Połączenie między tymi wierzchołkami zostało już zdefiniowane. Przechodzę do następnych danych.\n");
+                    fprintf(stderr, "Linia %d: Połączenie między wierzchołkami %d i %d zostało już zdefiniowane. Przechodzę do następnych danych.\n", i + 2, tmp1, wierz[wi]);
                     czy_znaleziono = 1;
                     break;
                 }
@@ -175,8 +182,9 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
             if ((gp->w[i] = realloc(gp->w[i], (edge + 1) * sizeof *gp->w[i])) == NULL)
             {
-                fprintf(stderr, "Nie udało się realokować pamięci na listę. Przerywam działanie.\n");
-                return 0;
+                fprintf(stderr, "Nie udało się realokować pamięci na listę wierzchołka %d. Przerywam działanie.\n", i);
+
+                return ERROR_ALLOC_NODE_LIST;
             }
         }
 
@@ -296,6 +304,14 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
 {
     int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
     queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
+
+    if (czy_odwiedzono == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę odwiedzonych wierzchołków. Przerywam działanie.\n");
+
+        exit(ERROR_ALLOC_VISITED);
+    }
+
     dodaj_element(kolejka, st);
     czy_odwiedzono[st] = 1;
     int tmp;
@@ -311,10 +327,7 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
 
             if (!czy_odwiedzono[(int)gp->w[tmp][i]])
             {
-                if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
-                {
-                    exit(EXIT_FAILURE);
-                }
+                dodaj_element(kolejka, (int)gp->w[tmp][i]);
 
                 czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
             }
@@ -332,6 +345,14 @@ int znajdz_droge_bfs(graph_t *gp, int st, int sp)
 void wyznacz_n_siatki(graph_t *gp)
 {
     int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+
+    if (czy_odwiedzono == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę odwiedzonych wierzchołków. Przerywam działanie.\n");
+
+        exit(ERROR_ALLOC_VISITED);
+    }
+
     queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
     int w = 0; // wierzchołek od którego zaczynamy szukać
     gp->n = 0;
@@ -357,10 +378,7 @@ void wyznacz_n_siatki(graph_t *gp)
 
                 if (!czy_odwiedzono[(int)gp->w[tmp][i]])
                 {
-                    if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
-                    {
-                        exit(EXIT_FAILURE);
-                    }
+                    dodaj_element(kolejka, (int)gp->w[tmp][i]);
 
                     czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
                 }
@@ -394,6 +412,14 @@ void wyswietl_sciezke(int *poprzednik, int w)
 void znajdz_droge(graph_t *gp, int st, int sp)
 {
     int *czy_odwiedzono = calloc(gp->x * gp->y, sizeof *czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+
+    if (czy_odwiedzono == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę odwiedzonych wierzchołków. Przerywam działanie.\n");
+
+        exit(ERROR_ALLOC_VISITED);
+    }
+
     queue_t *kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
     prqueue_t *kolejka_prio = zainicjalizuj_kolejke_pr(gp->x * gp->y);
 
@@ -412,10 +438,7 @@ void znajdz_droge(graph_t *gp, int st, int sp)
 
             if (!czy_odwiedzono[(int)gp->w[tmp][i]])
             {
-                if (!dodaj_element(kolejka, (int)gp->w[tmp][i])) // jeżeli nie udało się dodać
-                {
-                    exit(EXIT_FAILURE);
-                }
+                dodaj_element(kolejka, (int)gp->w[tmp][i]);
 
                 czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
             }
@@ -435,6 +458,27 @@ void znajdz_droge(graph_t *gp, int st, int sp)
     double *dyst = malloc((gp->x * gp->y) * sizeof *dyst);                   // odległość wierzchołków od ST
     int *poprzednik = malloc((gp->x * gp->y) * sizeof *dyst);                // przechowuje poprzednika do wyznaczenia drogi
     int *czy_przetworzono = calloc(gp->x * gp->y, sizeof *czy_przetworzono); // określa, czy dany wierzchołek został już przetworzony; 0 - nie, 1 - tak
+
+    if (dyst == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę odległości. Przerywam działanie,\n");
+
+        exit(ERROR_ALLOC_DIST);
+    }
+
+    if (poprzednik == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę poprzedników. Przerywam działanie,\n");
+
+        exit(ERROR_ALLOC_PREV);
+    }
+
+    if (czy_przetworzono == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę przetworzonych wierzchołków. Przerywam działanie,\n");
+
+        exit(ERROR_ALLOC_PROC);
+    }
 
     for (int i = 0; i < gp->x * gp->y; i++)
     {

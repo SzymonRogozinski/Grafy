@@ -3,6 +3,7 @@
 #include <getopt.h>
 
 #include "graf.h"
+#include "errors.h"
 
 #define DEFAULT_X 10
 #define DEFAULT_Y 10
@@ -18,23 +19,21 @@
 #define PARAM_OUTPUT_FILE 'o'
 #define PARAM_INPUT_FILE 'f'
 
-/*
-KODY RETURN:
-0  - poprawne działanie
--1 - argumenty wywołania niezgodne z założeniami
--2 - inne błędy w argumentach wywołania (np. niestandardowe parametry, dane bez parametru)
--3 - błąd z otwarciem pliku
--4 - błąd z wczytaniem grafu z pliku
--5 - budowa grafu uniemożliwia kontynuowanie działania
-*/
 int main(int argc, char **argv)
 {
-    int opt;
-    char *in = NULL;  // plik wejściowy
-    char *out = NULL; // plik wyjściowy
-    int byParam = 0;  // czy podano dane wejściowe przez argumenty wywołania; 0 - nie, 1 - tak
+    int opt, errnum;
+    char *in = NULL;                  // plik wejściowy
+    char *out = NULL;                 // plik wyjściowy
+    int byParam = 0;                  // czy podano dane wejściowe przez argumenty wywołania; 0 - nie, 1 - tak
+    graph_t *gp = malloc(sizeof *gp); // struktura grafu
 
-    graph_t *gp = malloc(sizeof *gp);
+    if (gp == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na strukturę grafu. Przerywam działanie.\n");
+
+        return ERROR_ALLOC_GRAPH;
+    }
+
     zainicjalizuj_graf(gp);
 
     int st = DEFAULT_VALUE; // wierzchołki START - STOP do wyznaczania drogi
@@ -49,14 +48,14 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Błędny format wartości argumentu \"-s\" - oczekiwano \"<st>,<sp>\". Przerywam działanie.\n");
 
-                return -1;
+                return ERROR_NODES_FORMAT;
             }
 
             if (st < 0 || sp < 0)
             {
                 fprintf(stderr, "Indeksy wierzchołków nie mogą być ujemne - wczytano “%d,%d”. Przerywam działanie.\n", st, sp);
 
-                return -1;
+                return ERROR_NEG_PATH_NODES;
             }
 
             break;
@@ -67,14 +66,14 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Błędny format wartości argumentu \"-r\" - oczekiwano \"<min>-<max>\". Przerywam działanie.\n");
 
-                return -1;
+                return ERROR_RANGE_FORMAT;
             }
 
             if (gp->min < 0 || gp->max <= gp->min)
             {
                 fprintf(stderr, "Błędny zakres wag krawędzi - wczytano “%g-%g”. Przerywam działanie.\n", gp->min, gp->max);
 
-                return -1;
+                return ERROR_BAD_WEIGHT_RANGE;
             }
             break;
         case PARAM_COLUMN_COUNT:
@@ -84,7 +83,7 @@ int main(int argc, char **argv)
             if (gp->x <= 0)
             {
                 fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
-                return -1;
+                return ERROR_NEG_COLUMN;
             }
 
             break;
@@ -95,7 +94,7 @@ int main(int argc, char **argv)
             if (gp->y <= 0)
             {
                 fprintf(stderr, "Liczba wierszy musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
-                return -1;
+                return ERROR_NEG_ROW;
             }
 
             break;
@@ -106,7 +105,7 @@ int main(int argc, char **argv)
             if (gp->n <= 0)
             {
                 fprintf(stderr, "Liczba spójnych grafów musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
-                return -1;
+                return ERROR_NEG_SUBGRAPH;
             }
 
             break;
@@ -118,7 +117,7 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf(stderr, "Wykryto błędny parametr w argumentach wywołania. Przerywam działanie.\n");
-            return -2;
+            return ERROR_UNKNOWN_PARAM;
         }
     }
 
@@ -126,14 +125,14 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "\nWykryto błędny parametr w argumentach wywołania. Przerywam działanie.\n");
 
-        return -2;
+        return ERROR_BAD_PARAM;
     }
 
     if (st == DEFAULT_VALUE || sp == DEFAULT_VALUE)
     {
         fprintf(stderr, "Nie zdefiniowano wierzchołków, między którymi miałaby zostać wyznaczona droga. Przerywam działanie.\n");
 
-        return -1;
+        return ERROR_UNDEFINED_PATH_NODES;
     }
 
     // GENEROWANIE GRAFU
@@ -149,23 +148,23 @@ int main(int argc, char **argv)
 
         if (inf == NULL)
         {
-            fprintf(stderr, "Nie udało się otworzyć pliku wejściowego. Przerywam działanie.\n");
+            fprintf(stderr, "Nie udało się otworzyć pliku wejściowego %s. Przerywam działanie.\n", in);
 
-            return -3;
+            return ERROR_OPEN_FILE;
         }
 
-        if (!wczytaj_graf(inf, gp))
+        if ((errnum = wczytaj_graf(inf, gp)) != 1)
         {
             fprintf(stderr, "Wystąpił błąd podczas wczytywania pliku wejściowego.\n");
 
-            return -4;
+            return errnum;
         }
 
         if (!sprawdz_integralnosc(gp))
         {
             fprintf(stderr, "Dane w grafie nie są integralne.\n");
 
-            return -5;
+            return ERROR_GRAPH_INTEGRITY;
         }
 
         wyznacz_n_siatki(gp);
@@ -200,14 +199,14 @@ int main(int argc, char **argv)
         {
             fprintf(stderr, "Liczba spójnych grafów musi być mniejsza od liczby wierzchołków. Przerywam działanie.\n");
 
-            return -5;
+            return ERROR_SUBGRAPH_OVER_NODE;
         }
     }
     // po wygenerowaniu grafu
 
     if (gp->n != 1) // jeżeli graf nie jest spójny
     {
-        printf("Wygenerowany graf nie jest spójny. Wyznaczenie drogi między wierzchołkami może być niemożliwe.\n");
+        printf("Wygenerowany graf nie jest spójny - liczba wykrytych fragmentów: %d. Wyznaczenie drogi między wierzchołkami może być niemożliwe.\n", gp->n);
     }
 
     if (out != NULL)
@@ -231,14 +230,14 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "Indeksy wierzchołków ST=%d, SP=%d nie należą do zakresu <0;%d>. Przerywam działanie.\n", st, sp, gp->x * gp->y - 1);
 
-        return -5;
+        return ERROR_PATH_OUT_OF_RANGE;
     }
 
     if (!znajdz_droge_bfs(gp, st, sp)) // jeżeli nie znaleziono drogi między dwoma wierzchołkami
     {
         fprintf(stderr, "Nie udało się znaleźć drogi między wierzchołkami %d i %d. Przerywam działanie.\n", st, sp);
 
-        return -5;
+        return ERROR_NO_AVAILABLE_PATH;
     }
 
     znajdz_droge(gp, st, sp);
@@ -249,5 +248,5 @@ int main(int argc, char **argv)
         free(gp);
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

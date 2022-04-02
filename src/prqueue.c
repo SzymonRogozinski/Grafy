@@ -2,29 +2,44 @@
 #include <stdio.h>
 
 #include "prqueue.h"
+#include "errors.h"
 
 prqueue_t *zainicjalizuj_kolejke_pr(int rozmiar)
 {
     prqueue_t *kolejka = malloc(sizeof *kolejka);
+
+    if (kolejka == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na strukturę kolejki priorytetowej. Przerywam działanie.\n");
+
+        exit(ERROR_ALLOC_PRQUEUE);
+    }
+
     kolejka->n = 0;
     kolejka->queue = malloc(rozmiar * sizeof *kolejka->queue);
     kolejka->size = rozmiar;
 
+    if (kolejka->queue == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę elementów kolejki prioretytowej. Przerywam działanie.\n");
+
+        exit(ERROR_ALLOC_PRQ_ARRAY);
+    }
+
     return kolejka;
 }
 
-int dodaj_element_pr(prqueue_t *kolejka, int el)
+void dodaj_element_pr(prqueue_t *kolejka, int el)
 {
     if (kolejka->n == kolejka->size) // jeżeli kolejka jest pełna, to przerwij działanie
     {
         fprintf(stderr, "Kolejka jest pełna, nie można dodać więcej elementów.\n");
-        return 0;
+
+        exit(ERROR_PRQUEUE_FULL);
     }
 
     kolejka->queue[kolejka->n] = el;
     kolejka->n++;
-
-    return 1;
 }
 
 int usun_element_pr(prqueue_t *kolejka, double *dyst)
