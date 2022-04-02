@@ -86,7 +86,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
         if (counter > 4)
         {
-            fprintf(stderr, "W linii znajduje się powyżej 4 sąsiadujących wierzchołków: %d. Dane powyżej limitu zostaną pominięte.\n", counter);
+            fprintf(stderr, "Linia %d: W linii znajduje się powyżej 4 sąsiadujących wierzchołków: %d. Dane powyżej limitu zostaną pominięte.\n", i + 2, counter);
         }
 
         strstream = fmemopen(buf, strlen(buf), "r");
@@ -122,7 +122,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
             if (!czy_sasiaduja(i, tmp1, gp->y, gp->x)) // sprawdza, czy mogą ze sobą sąsiadować
             {
-                fprintf(stderr, "Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i, tmp1);
+                fprintf(stderr, "Linia %d: Wykryto nieprawidłowe połączenie między wierzchołkami %d i %d. Połączenie zostaje pominięte.\n", i + 2, i, tmp1);
                 continue;
             }
 
@@ -153,7 +153,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
             {
                 if (tmp1 == wierz[wi]) // jeżeli w tej linii już był ten wierzchołek
                 {
-                    fprintf(stderr, "Połączenie między tymi wierzchołkami zostało już zdefiniowane. Przechodzę do następnych danych.\n");
+                    fprintf(stderr, "Linia %d: Połączenie między wierzchołkami %d i %d zostało już zdefiniowane. Przechodzę do następnych danych.\n", i + 2, tmp1, wierz[wi]);
                     czy_znaleziono = 1;
                     break;
                 }
@@ -182,7 +182,7 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
 
             if ((gp->w[i] = realloc(gp->w[i], (edge + 1) * sizeof *gp->w[i])) == NULL)
             {
-                fprintf(stderr, "Nie udało się realokować pamięci na listę. Przerywam działanie.\n");
+                fprintf(stderr, "Nie udało się realokować pamięci na listę wierzchołka %d. Przerywam działanie.\n", i);
 
                 return ERROR_ALLOC_NODE_LIST;
             }

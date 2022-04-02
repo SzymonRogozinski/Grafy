@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 
         if (inf == NULL)
         {
-            fprintf(stderr, "Nie udało się otworzyć pliku wejściowego. Przerywam działanie.\n");
+            fprintf(stderr, "Nie udało się otworzyć pliku wejściowego %s. Przerywam działanie.\n", in);
 
             return ERROR_OPEN_FILE;
         }
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 
     if (gp->n != 1) // jeżeli graf nie jest spójny
     {
-        printf("Wygenerowany graf nie jest spójny. Wyznaczenie drogi między wierzchołkami może być niemożliwe.\n");
+        printf("Wygenerowany graf nie jest spójny - liczba wykrytych fragmentów: %d. Wyznaczenie drogi między wierzchołkami może być niemożliwe.\n", gp->n);
     }
 
     if (out != NULL)
