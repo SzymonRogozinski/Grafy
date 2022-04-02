@@ -11,7 +11,7 @@ typedef struct Kolejka
 } queue_t;
 
 queue_t *zainicjalizuj_kolejke(int); // inicjalizuje kolejkę o określonym rozmiarze
-int dodaj_element(queue_t *, int);   // dodaje element do kolejki; 0 - nie udało się dodać, 1 - udało się
+void dodaj_element(queue_t *, int);   // dodaje element do kolejki; 0 - nie udało się dodać, 1 - udało się
 int usun_element(queue_t *);         // wyjmuje element z początku kolejki
 int czy_pusta(queue_t *);            // sprawdza, czy w kolejce są jakieś elementy; 0 - tak, 1 - nie
 void zrestartuj_kolejke(queue_t *);   // przywraca wartości domyślne kolejki
