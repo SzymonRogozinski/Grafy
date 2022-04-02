@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        printf("Użycie: ./iotest [nazwa pliku wejściowego]\n");
+        printf("Użycie: ./io_test [nazwa pliku wejściowego]\n");
         return 1;
     }
 
