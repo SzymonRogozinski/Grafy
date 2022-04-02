@@ -380,6 +380,8 @@ int generuj_graf(graph_t* G) {
 //Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
 int szukaj_wierzcholek(int edge,int seek,graph_t *G) {
     int i = 0;
+    if (seek < 0)
+        return -1;
     while (G->w[edge][i]!=(double)seek && i<8)
         i += 2;
     return i<8 ? i: -1;
@@ -403,6 +405,7 @@ int dziel_graf(graph_t* G) {
     while (ile_sasiadow(G,r)==4 || ile_sasiadow(G, r) == 0);
     trail[n++] = r;
     int i;
+    int j;
     do {
         p = G->w[r][(int)losuj(0, ile_sasiadow(G,r))*2];
         //sprawdzanie, czy wierzchołek się nie powtórzył
@@ -426,30 +429,50 @@ int dziel_graf(graph_t* G) {
         else {
             //Sprawdzanie połączeń
             for (i = 0; i < 2; i++) {
-                for (int j = 0; j < ile_sasiadow(G, trail[i]); j++) {
+                for (j = 0; j < ile_sasiadow(G, trail[i]); j++) {
                     if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
                         return zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
                 }
             }
             //Oderwanie tych dwóch wierzchołków nie spowoduje podzielenia grafu na więcej niż 2, odrywam połączenia zewnętrzne
-            for (i = 0; i < 2; i++) {
-                for (int j = 0; j < ile_sasiadow(G, trail[i]); j++)
-                    zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
+            //Pierwszy wierzchołek
+            while (ile_sasiadow(G,trail[0])!=1) {
+                if (G->w[trail[0]][0] != trail[1])
+                    if (!zerwanie_polaczenia(G, trail[0], G->w[trail[0]][0]))
+                        return 0;
+                else
+                    if(!zerwanie_polaczenia(G, trail[0], G->w[trail[0]][2]))
+                        return 0;
+            }
+            //Drugi wierzchołek
+            while (ile_sasiadow(G, trail[1]) != 1) {
+                if (G->w[trail[1]][0] != trail[0])
+                    if (!zerwanie_polaczenia(G, trail[1], G->w[trail[1]][0]))
+                        return 0;
+                    else
+                        if (!zerwanie_polaczenia(G, trail[1], G->w[trail[1]][2]))
+                            return 0;
             }
         }
     }
     else{
         //Sprawdzanie połączeń
         for (i = 0; i < n; i++) {
-            for (int j = 0; j < ile_sasiadow(G, trail[i]); j++) {
+            for (j = 0; j < ile_sasiadow(G, trail[i]); j++) {
                 if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
                     return zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
             }
         }
         //Jeśli wszystko dobrze, to tnij wzdłuż ścieżki
-        for (i = 0;i<n-1;i++) {
-            if (!zerwanie_polaczenia(G,trail[i],trail[i+1]))
-                return 0;
+        for (i = 0;i<n;i++) {
+            j = 0;
+            while (j<ile_sasiadow(G,trail[i])) {
+                //Tnie lewe albo dolne połączenie
+                if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i],trail[i] / G->x != G->y - 1,G)!=-1)
+                    zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
+                else
+                    j++;
+            }
         }
     }
     free(trail);
