@@ -616,13 +616,14 @@ int generuj_graf(graph_t *G)
         }
     }
 
-    if (G->n > 1)
-    { // Sprawdzanie czy jest więcej niż jeden graf
+    if (G->n > 1) // dzielenie grafu jeżeli N > 1
+    {
         int ile = G->n - 1;
+        int errnum;
 
         while (ile)
-            if (!dziel_graf(G))
-                return 0;
+            if ((errnum = dziel_graf(G)) != 1) // jeżeli dzielenie się nie powiodło, zwraca kod błędu
+                return errnum;
             else
                 ile--;
     }
