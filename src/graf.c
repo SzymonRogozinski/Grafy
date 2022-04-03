@@ -636,13 +636,10 @@ int szukaj_wierzcholek(int edge, int seek, graph_t *G)
 {
     int i = 0;
 
-    if (seek < 0)
-        return -1;
-
     while (G->w[edge][i] != (double)seek && i < 8)
         i += 2;
 
-    return i < 8 ? i : -1;
+    return i;
 }
 
 // Losuje liczbę z podanego zakresu
