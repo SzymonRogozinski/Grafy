@@ -773,6 +773,8 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
 {
     int x = szukaj_wierzcholek(q, p, G); // indeks wierzchołka P w liście Q
     int y = szukaj_wierzcholek(p, q, G); // indeks wierzchołka Q w liście P
+    int countQ = ile_sasiadow(G, q);
+    int countP = ile_sasiadow(G, p);
 
     if (x != -1)
     {
@@ -787,7 +789,7 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
             }
         }
 
-        if (x == 6) // może nie trzeba nic przesuwać, bo połączenie do usunięcia jest na końcu
+        if (countQ == 4) // jeżeli były cztery elementy, to -1 trzeba wstawic ręcznie
         {
             G->w[q][6] = -1;
             G->w[q] = realloc(G->w[q], 7 * sizeof *G->w[q]);
@@ -807,7 +809,7 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
             }
         }
 
-        if (y == 6) // może nie trzeba nic przesuwać, bo połączenie do usunięcia jest na końcu
+        if (countP == 4) // jeżeli były cztery elementy, to -1 trzeba wstawic ręcznie
         {
             G->w[p][6] = -1;
             G->w[p] = realloc(G->w[p], 7 * sizeof *G->w[p]);
