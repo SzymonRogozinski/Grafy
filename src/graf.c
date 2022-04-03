@@ -92,7 +92,6 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         }
 
         strstream = fmemopen(buf, strlen(buf), "r");
-        strstream = NULL;
 
         if (strstream == NULL)
         {
