@@ -526,82 +526,110 @@ void znajdz_droge(graph_t *gp, int st, int sp)
 int generuj_graf(graph_t *G)
 {
     srand(time(NULL));
-    if (G->w == NULL)
-        return 1;
+
+    if ((G->w = malloc(G->y * G->x * sizeof *G->w)) == NULL) // alokowanie pamięci na wierzchołki
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa. Przerywam działanie.\n");
+
+        return ERROR_ALLOC_GRAPH_LIST;
+    }
+
     for (int i = 0; i < G->x * G->y; i++)
     {
-        G->w[i] = malloc(8 * sizeof *G->w[i]);
-        if (G->w[i] == NULL)
-            return 1;
+        if ((G->w[i] = malloc(8 * sizeof *G->w[i])) == NULL) // czy udało się zaalokować pamięć dla 1 wierzchołka
+        {
+            fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa dla wierzchołka %d. Przerywam działanie.\n", i);
+
+            return ERROR_ALLOC_NODE_LIST;
+        }
     }
+
     // Zapisywanie sąsiadów
     int position;
+
     for (int i = 0; i < G->x * G->y; i++)
     {
         position = 0;
-        if (i >= G->x)
-        { // Czy ma nad sobą sąsiada
+
+        if ((i - i % G->x) / G->x != 0) // jeżeli nie jest w 1 wierszu
+        {
             G->w[i][position] = i - G->x;
             position += 2;
         }
-        if (i % G->x != 0)
-        { // Czy ma po lewej sąsiada
+
+        if (i % G->x != 0) // jeżeli nie jest w 1 kolumnie
+        {
             G->w[i][position] = i - 1;
             position += 2;
         }
-        if ((i + 1) % G->x != 0)
-        { // Czy ma po prawej sąsiada
+
+        if (i % G->x + 1 != G->x) // jeżeli nie jest w ostatniej kolumnie
+        {
             G->w[i][position] = i + 1;
             position += 2;
         }
-        if (i / G->x != G->y - 1)
-        { // Czy ma pod sobą sąsiada
+
+        if ((i - i % G->x) / G->x + 1 != G->y) // jeżeli nie jest w ostatnim wierszu
+        {
             G->w[i][position] = i + G->x;
             position += 2;
         }
+
         if (position < 8)
         {
-            G->w[i][position] = -1.0; // Flaga końcowa
+            G->w[i][position] = -1.0; // flaga końcowa (krawędź listy)
+
             if ((G->w[i] = realloc(G->w[i], (position + 1) * sizeof *G->w[i])) == NULL)
-                return 1;
+            {
+                fprintf(stderr, "Nie udało się realokować pamięci na listę wierzchołka %d. Przerywam działanie.\n", i);
+
+                return ERROR_ALLOC_NODE_LIST;
+            }
         }
     }
     // Zapisywanie wag
     for (int i = 0; i < G->x * G->y; i++)
     {
         position = 1;
-        if (i >= G->x)
-        { // Czy ma nad sobą sąsiada |Przepisuje|
+
+        if ((i - i % G->x) / G->x != 0) // jeżeli nie jest w 1 wierszu, przepisuje
+        {
             G->w[i][position] = G->w[i - G->x][szukaj_wierzcholek(i - G->x, i, G) + 1];
             position += 2;
         }
-        if (i % G->x != 0)
-        { // Czy ma po lewej sąsiada |Przepisuje|
+
+        if (i % G->x != 0) // jeżeli nie jest w 1 kolumnie, przepisuje
+        {
             G->w[i][position] = G->w[i - 1][szukaj_wierzcholek(i - 1, i, G) + 1];
             position += 2;
         }
-        if ((i + 1) % G->x != 0)
-        { // Czy ma po prawej sąsiada |Losuje|
+
+        if (i % G->x + 1 != G->x) // jeżeli nie jest w ostatniej kolumnie, losuje
+        {
             G->w[i][position] = losuj(G->min, G->max);
             position += 2;
         }
-        if (i / G->x != G->y - 1)
-        { // Czy ma pod sobą sąsiada |Losuje|
+
+        if ((i - i % G->x) / G->x + 1 != G->y) // jeżeli nie jest w ostatnim wierszu, losuje
+        {
             G->w[i][position] = losuj(G->min, G->max);
         }
     }
 
-    return 0; // Jeśli wszystko poprawne
+    return 1; // jeżeli wszystko poprawnie
 }
 
 // Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
 int szukaj_wierzcholek(int edge, int seek, graph_t *G)
 {
     int i = 0;
+
     if (seek < 0)
         return -1;
+
     while (G->w[edge][i] != (double)seek && i < 8)
         i += 2;
+
     return i < 8 ? i : -1;
 }
 
