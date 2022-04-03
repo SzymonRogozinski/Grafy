@@ -631,7 +631,6 @@ int generuj_graf(graph_t *G)
     return 1; // jeżeli wszystko poprawnie
 }
 
-// Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
 int szukaj_wierzcholek(int edge, int seek, graph_t *G)
 {
     int i = 0;
@@ -642,13 +641,12 @@ int szukaj_wierzcholek(int edge, int seek, graph_t *G)
     return i;
 }
 
-// Losuje liczbę z podanego zakresu
+
 double losuj(double min, double max)
 {
     return (double)rand() / RAND_MAX * (max - min) + min;
 }
 
-// Funkcja dzieląca jeden graf na dwa
 int dziel_graf(graph_t *G)
 {
     int r, p;       // Zmienna losowa
@@ -761,7 +759,7 @@ int dziel_graf(graph_t *G)
     free(trail);
     return 1;
 }
-// Funkcja zrywa połączenie miedzy dwoma wierzchołkami
+
 int zerwanie_polaczenia(graph_t *G, int q, int p)
 {
     int x, y; // Indeksy połączeń
@@ -789,7 +787,6 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
     return (G->w[q] = realloc(G->w[q], (n * 2 - 1) * sizeof *G->w[q])) == NULL || (G->w[p] = realloc(G->w[p], (m * 2 - 1) * sizeof *G->w[p])) == NULL;
 }
 
-// Liczy ile sąsiadów ma wierzchołek
 int ile_sasiadow(graph_t *G, int edge)
 {
     int n = 0;
