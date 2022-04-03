@@ -767,30 +767,33 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
     int x = szukaj_wierzcholek(q, p, G); // indeks wierzchołka P w liście Q
     int y = szukaj_wierzcholek(p, q, G); // indeks wierzchołka Q w liście P
 
-    if (x == -1 || y == -1) // jeżeli nie ma tego wierzchołka w liście to nie ma co zrywać
-        return 1;
-
-    for (int i = x + 2; i < 8; i++) // przesuwanie tablicy wierzchołka Q
+    if (x != -1)
     {
-        G->w[q][i - 2] = G->w[q][i];
-
-        if (G->w[q][i] == -1)
+        for (int i = x + 2; i < 8; i++) // przesuwanie tablicy wierzchołka Q
         {
-            G->w[q] = realloc(G->w[q], (i - 1) * sizeof *G->w[q]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
+            G->w[q][i - 2] = G->w[q][i];
 
-            break;
+            if (G->w[q][i] == -1)
+            {
+                G->w[q] = realloc(G->w[q], (i - 1) * sizeof *G->w[q]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
+
+                break;
+            }
         }
     }
 
-    for (int i = y + 2; i < 8; i++) // przesuwanie tablicy wierzchołka P
+    if (y != -1)
     {
-        G->w[p][i - 2] = G->w[p][i];
-
-        if (G->w[p][i] == -1)
+        for (int i = y + 2; i < 8; i++) // przesuwanie tablicy wierzchołka P
         {
-            G->w[p] = realloc(G->w[p], (i - 1) * sizeof *G->w[p]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
+            G->w[p][i - 2] = G->w[p][i];
 
-            break;
+            if (G->w[p][i] == -1)
+            {
+                G->w[p] = realloc(G->w[p], (i - 1) * sizeof *G->w[p]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
+
+                break;
+            }
         }
     }
 
