@@ -807,7 +807,7 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
         }
     }
 
-    return !(G->w[q] == NULL || G->w[p] == NULL);
+    return (G->w[q] != NULL && G->w[p] != NULL);
 }
 
 int ile_sasiadow(graph_t *G, int edge)
