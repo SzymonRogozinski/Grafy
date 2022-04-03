@@ -38,4 +38,6 @@
 #define ERROR_QUEUE_FULL -45      // przepełnienie kolejki
 #define ERROR_PRQUEUE_FULL -46    // przepełnienie kolejki priorytetowej
 
+#define ERROR_ALLOC_TRAIL -50 // błąd alokacji pamięci na ścieżkę punktów do odcięcia
+
 #endif
