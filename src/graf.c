@@ -776,9 +776,14 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
             if (G->w[q][i] == -1)
             {
                 G->w[q] = realloc(G->w[q], (i - 1) * sizeof *G->w[q]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
-
                 break;
             }
+        }
+
+        if (x == 6) // może nie trzeba nic przesuwać, bo połączenie do usunięcia jest na końcu
+        {
+            G->w[q][6] = -1;
+            G->w[q] = realloc(G->w[q], 7 * sizeof *G->w[q]);
         }
     }
 
@@ -791,9 +796,14 @@ int zerwanie_polaczenia(graph_t *G, int q, int p)
             if (G->w[p][i] == -1)
             {
                 G->w[p] = realloc(G->w[p], (i - 1) * sizeof *G->w[p]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
-
                 break;
             }
+        }
+
+        if (y == 6) // może nie trzeba nic przesuwać, bo połączenie do usunięcia jest na końcu
+        {
+            G->w[p][6] = -1;
+            G->w[p] = realloc(G->w[p], 7 * sizeof *G->w[p]);
         }
     }
 
