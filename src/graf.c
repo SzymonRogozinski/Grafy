@@ -682,6 +682,11 @@ int dziel_graf(graph_t *G)
                     return 0; // Błąd
             }
         }
+        else // Jeśli ścieżka się przecieła, generuj nową
+        {
+            free(trail);
+            return dziel_graf(G);
+        }
     } while (ile_sasiadow(G, r) == 4);
     if (n == 2)
     {                                                                   // Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
@@ -748,10 +753,12 @@ int dziel_graf(graph_t *G)
             {
                 // Tnie lewe albo dolne połączenie
                 if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i], trail[i] / G->x != G->y - 1, G) != -1)
+                {
                     if (!zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
                         return 0;
-                    else
-                        j++;
+                }
+                else
+                    j++;
             }
         }
     }
