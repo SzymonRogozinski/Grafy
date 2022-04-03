@@ -371,8 +371,11 @@ int generuj_graf(graph_t* G) {
     }
     if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
         int ile = G->n-1;
-        while(ile)
-            ile-=dziel_graf(G);
+        while (ile)
+            if (!dziel_graf(G))
+                return 1;
+            else
+                ile--;
     }
     return 0; //Jeśli wszystko poprawne
 }
@@ -425,33 +428,37 @@ int dziel_graf(graph_t* G) {
     } while (ile_sasiadow(G, r) == 4);
     if (n == 2) { //Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
         if (ile_sasiadow(G, trail[0]) + ile_sasiadow(G, trail[1]) == 2) //Wierzchołki są połączone tylko ze sobą
-            return zerwanie_polaczenia(G, trail[0], trail[1]);
+            return !zerwanie_polaczenia(G, trail[0], trail[1]);
         else {
             //Sprawdzanie połączeń
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < ile_sasiadow(G, trail[i]); j++) {
                     if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                        return zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
+                        return !zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
                 }
             }
             //Oderwanie tych dwóch wierzchołków nie spowoduje podzielenia grafu na więcej niż 2, odrywam połączenia zewnętrzne
             //Pierwszy wierzchołek
             while (ile_sasiadow(G,trail[0])!=1) {
-                if (G->w[trail[0]][0] != trail[1])
-                    if (!zerwanie_polaczenia(G, trail[0], G->w[trail[0]][0]))
+                if (G->w[trail[0]][0] != trail[1]){
+                    if (zerwanie_polaczenia(G, trail[0], G->w[trail[0]][0]))
                         return 0;
-                else
-                    if(!zerwanie_polaczenia(G, trail[0], G->w[trail[0]][2]))
+                }
+                else{
+                    if(zerwanie_polaczenia(G, trail[0], G->w[trail[0]][2]))
                         return 0;
+                }
             }
             //Drugi wierzchołek
             while (ile_sasiadow(G, trail[1]) != 1) {
-                if (G->w[trail[1]][0] != trail[0])
-                    if (!zerwanie_polaczenia(G, trail[1], G->w[trail[1]][0]))
+                if (G->w[trail[1]][0] != trail[0]){
+                    if (zerwanie_polaczenia(G, trail[1], G->w[trail[1]][0]))
                         return 0;
-                    else
-                        if (!zerwanie_polaczenia(G, trail[1], G->w[trail[1]][2]))
-                            return 0;
+                }
+                else{
+                    if (zerwanie_polaczenia(G, trail[1], G->w[trail[1]][2]))
+                        return 0;
+                }
             }
         }
     }
@@ -460,7 +467,7 @@ int dziel_graf(graph_t* G) {
         for (i = 0; i < n; i++) {
             for (j = 0; j < ile_sasiadow(G, trail[i]); j++) {
                 if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                    return zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
+                    return !zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
             }
         }
         //Jeśli wszystko dobrze, to tnij wzdłuż ścieżki
@@ -468,13 +475,17 @@ int dziel_graf(graph_t* G) {
             j = 0;
             while (j<ile_sasiadow(G,trail[i])) {
                 //Tnie lewe albo dolne połączenie
-                if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i],trail[i] / G->x != G->y - 1,G)!=-1)
-                    zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
+                if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i], trail[i] / G->x != G->y - 1, G) != -1)
+                    if (zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
+                        return 0;
                 else
                     j++;
             }
         }
     }
+    for(i=0;i<n;i++)
+        printf("%d ",trail[i]);
+    printf("\n");
     free(trail);
     return 1;
 }
@@ -484,23 +495,23 @@ int zerwanie_polaczenia(graph_t* G,int q,int p) {
     int n, m; //Liczba sąsiadów
     x = szukaj_wierzcholek(q,p,G);
     y = szukaj_wierzcholek(p, q, G);
-    if (x<0 || y<0) 
-        return 0;
     n = ile_sasiadow(G, q); //Ile sąsiadów q
     m = ile_sasiadow(G, p); //Ile sąsiadów p
     //Przesuwanie tablicy wierzchołka q
-    for (int i=x;i<n*2;i+=2) {
+    for (int i=x;i<n*2-3;i+=2) {
         G->w[q][i] = G->w[q][i+2];
         G->w[q][i+1] = G->w[q][i+3];
     }
-    G->w[q][n*2-1]=-1.0;
+    G->w[q][n*2-2]=-1.0;
     //Przesuwanie tablicy wierzchołka p
-    for (int i = x; i <m*2; i += 2) {
+    for (int i = y; i <m*2-3; i += 2) {
         G->w[p][i] = G->w[p][i+2];
         G->w[p][i + 1] = G->w[p][i + 3];
     }
-    G->w[q][m * 2 - 1] = -1.0;
-    return (G->w[q]=realloc(G->w[q],(n*2+1)*sizeof*G->w[q]))==NULL || (G->w[p] = realloc(G->w[p], (m*2+1) * sizeof * G->w[p])) == NULL;
+    G->w[p][m * 2 - 2] = -1.0;
+    x = szukaj_wierzcholek(q, p, G);
+    y = szukaj_wierzcholek(p, q, G);
+    return (G->w[q]=realloc(G->w[q],(n*2-1)*sizeof*G->w[q]))==NULL || (G->w[p] = realloc(G->w[p], (m*2-1) * sizeof * G->w[p])) == NULL;
 }
 
 //Liczy ile sąsiadów ma wierzchołek
