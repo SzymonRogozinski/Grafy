@@ -590,12 +590,7 @@ int generuj_graf(graph_t *G)
             G->w[i][position] = losuj(G->min, G->max);
         }
     }
-    if (G->n > 1)
-    { // Sprawdzanie czy jest więcej niż jeden graf
-        int ile = G->n - 1;
-        while (ile)
-            ile -= dziel_graf(G);
-    }
+
     return 0; // Jeśli wszystko poprawne
 }
 
