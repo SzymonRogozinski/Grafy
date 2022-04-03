@@ -4,6 +4,9 @@ sgraph:
 io_test:
 	$(CC) -o io_test src/graf.c src/io_test.c src/queue.c src/prqueue.c
 
+gen_test:
+	$(CC) -o gen_test src/graf.c src/gen_test.c src/queue.c src/prqueue.c
+
 .PHONY: clean
 
 clean:

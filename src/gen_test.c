@@ -14,11 +14,17 @@ int main(int argc, char **argv)
     graph_t *G = malloc(sizeof *G);
     zainicjalizuj_graf(G);
 
-	G->x = atoi(argv[1]);
-	G->y = atoi(argv[2]);
-	G->n = atoi(argv[3]);
-	G->min = atof(argv[4]);
-	G->max = atof(argv[5]);
+    G->x = atoi(argv[1]);
+    G->y = atoi(argv[2]);
+    G->n = atoi(argv[3]);
+    G->min = atof(argv[4]);
+    G->max = atof(argv[5]);
+
+    if (G->x <= 0 || G->y <= 0 || G->n <= 0 || G->n > G->x * G->y || G->min < 0 || G->max < G->min)
+    {
+        fprintf(stderr, "Błędne argumenty wywołania.\n");
+        return 1;
+    }
 
     if (generuj_graf(G) != 1)
     {
