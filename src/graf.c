@@ -633,14 +633,16 @@ int generuj_graf(graph_t *G)
 
 int szukaj_wierzcholek(int edge, int seek, graph_t *G)
 {
-    int i = 0;
+    for (int i = 0; i < 8; i += 2)
+    {
+        if (G->w[edge][i] == -1)
+            break;
+        else if (G->w[edge][i] == (double)seek)
+            return i;
+    }
 
-    while (G->w[edge][i] != (double)seek && i < 8)
-        i += 2;
-
-    return i;
+    return -1;
 }
-
 
 double losuj(double min, double max)
 {
