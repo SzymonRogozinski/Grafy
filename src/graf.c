@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "graf.h"
 #include "queue.h"
@@ -518,4 +520,315 @@ void znajdz_droge(graph_t *gp, int st, int sp)
     free(czy_przetworzono);
     free(kolejka_prio->queue);
     free(kolejka_prio);
+}
+
+int generuj_graf(graph_t *G)
+{
+    srand(time(NULL));
+
+    if ((G->w = malloc(G->y * G->x * sizeof *G->w)) == NULL) // alokowanie pamięci na wierzchołki
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa. Przerywam działanie.\n");
+
+        return ERROR_ALLOC_GRAPH_LIST;
+    }
+
+    for (int i = 0; i < G->x * G->y; i++)
+    {
+        if ((G->w[i] = malloc(8 * sizeof *G->w[i])) == NULL) // czy udało się zaalokować pamięć dla 1 wierzchołka
+        {
+            fprintf(stderr, "Nie udało się zaalokować pamięci na listę sąsiedstwa dla wierzchołka %d. Przerywam działanie.\n", i);
+
+            return ERROR_ALLOC_NODE_LIST;
+        }
+    }
+
+    // Zapisywanie sąsiadów
+    int position;
+
+    for (int i = 0; i < G->x * G->y; i++)
+    {
+        position = 0;
+
+        if ((i - i % G->x) / G->x != 0) // jeżeli nie jest w 1 wierszu
+        {
+            G->w[i][position] = i - G->x;
+            position += 2;
+        }
+
+        if (i % G->x != 0) // jeżeli nie jest w 1 kolumnie
+        {
+            G->w[i][position] = i - 1;
+            position += 2;
+        }
+
+        if (i % G->x + 1 != G->x) // jeżeli nie jest w ostatniej kolumnie
+        {
+            G->w[i][position] = i + 1;
+            position += 2;
+        }
+
+        if ((i - i % G->x) / G->x + 1 != G->y) // jeżeli nie jest w ostatnim wierszu
+        {
+            G->w[i][position] = i + G->x;
+            position += 2;
+        }
+
+        if (position < 8)
+        {
+            G->w[i][position] = -1.0; // flaga końcowa (krawędź listy)
+
+            if ((G->w[i] = realloc(G->w[i], (position + 1) * sizeof *G->w[i])) == NULL)
+            {
+                fprintf(stderr, "Nie udało się realokować pamięci na listę wierzchołka %d. Przerywam działanie.\n", i);
+
+                return ERROR_ALLOC_NODE_LIST;
+            }
+        }
+    }
+    // Zapisywanie wag
+    for (int i = 0; i < G->x * G->y; i++)
+    {
+        position = 1;
+
+        if ((i - i % G->x) / G->x != 0) // jeżeli nie jest w 1 wierszu, przepisuje
+        {
+            G->w[i][position] = G->w[i - G->x][szukaj_wierzcholek(i - G->x, i, G) + 1];
+            position += 2;
+        }
+
+        if (i % G->x != 0) // jeżeli nie jest w 1 kolumnie, przepisuje
+        {
+            G->w[i][position] = G->w[i - 1][szukaj_wierzcholek(i - 1, i, G) + 1];
+            position += 2;
+        }
+
+        if (i % G->x + 1 != G->x) // jeżeli nie jest w ostatniej kolumnie, losuje
+        {
+            G->w[i][position] = losuj(G->min, G->max);
+            position += 2;
+        }
+
+        if ((i - i % G->x) / G->x + 1 != G->y) // jeżeli nie jest w ostatnim wierszu, losuje
+        {
+            G->w[i][position] = losuj(G->min, G->max);
+        }
+    }
+
+    if (G->n > 1) // dzielenie grafu jeżeli N > 1
+    {
+        int ile = G->n - 1;
+        int errnum;
+
+        while (ile)
+            if ((errnum = dziel_graf(G)) != 1) // jeżeli dzielenie się nie powiodło, zwraca kod błędu
+                return errnum;
+            else
+                ile--;
+    }
+
+    return 1; // jeżeli wszystko poprawnie
+}
+
+int szukaj_wierzcholek(int edge, int seek, graph_t *G)
+{
+    for (int i = 0; i < 8; i += 2)
+    {
+        if (G->w[edge][i] == -1)
+            break;
+        else if (G->w[edge][i] == (double)seek)
+            return i;
+    }
+
+    return -1;
+}
+
+double losuj(double min, double max)
+{
+    return (double)rand() / RAND_MAX * (max - min) + min;
+}
+
+int dziel_graf(graph_t *G)
+{
+    int r, p;   // zmienne losowe
+    int n = 0;  // długość ścieżki
+    int *trail; // ścieżka punktów
+
+    if ((trail = malloc(G->x * G->y * sizeof *trail)) == NULL)
+        return ERROR_ALLOC_TRAIL;
+
+    do                                                              // Robi to dopóki, nie wylosuje wierzchołka, który nie ma 4 sąsiadów, ale ma chociaż jednego
+        r = ((int)losuj(0, G->y)) * (G->x) + ((int)losuj(0, G->x)); // Losowanie z całego zakresu wierzchołków
+    while (ile_sasiadow(G, r) == 4 || ile_sasiadow(G, r) == 0);
+
+    trail[n++] = r;
+    int i, j;
+
+    do
+    {
+        p = G->w[r][(int)losuj(0, ile_sasiadow(G, r)) * 2];
+
+        for (i = 0; i < n; i++) // sprawdzanie, czy wierzchołek się nie powtórzył
+            if (trail[i] == p)
+                break;
+
+        if (i == n) // Jeśli nie, dodaje
+        {
+            trail[n++] = p;
+            r = p;
+        }
+        else // Jeśli ścieżka się przecieła, generuj nową
+        {
+            free(trail);
+            return dziel_graf(G);
+        }
+    } while (ile_sasiadow(G, r) == 4);
+
+    if (n == 2)
+    {                                                                   // Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
+        if (ile_sasiadow(G, trail[0]) + ile_sasiadow(G, trail[1]) == 2) // Wierzchołki są połączone tylko ze sobą
+            if (!zerwanie_polaczenia(G, trail[0], trail[1]))
+                return ERROR_ALLOC_NODE_LIST;
+            else
+                return 1;
+        else
+        {
+            // Sprawdzanie połączeń
+            for (i = 0; i < 2; i++)
+            {
+                for (j = 0; j < ile_sasiadow(G, trail[i]); j++)
+                {
+                    if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) // Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
+                        if (!zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
+                            return ERROR_ALLOC_NODE_LIST;
+                        else
+                            return 1;
+                }
+            }
+
+            // Oderwanie tych dwóch wierzchołków nie spowoduje podzielenia grafu na więcej niż 2, odrywam połączenia zewnętrzne
+            // Pierwszy wierzchołek
+            while (ile_sasiadow(G, trail[0]) != 1)
+            {
+                if (G->w[trail[0]][0] != trail[1])
+                {
+                    if (!zerwanie_polaczenia(G, trail[0], G->w[trail[0]][0]))
+                        return ERROR_ALLOC_NODE_LIST;
+                }
+                else
+                {
+                    if (!zerwanie_polaczenia(G, trail[0], G->w[trail[0]][2]))
+                        return ERROR_ALLOC_NODE_LIST;
+                }
+            }
+            // Drugi wierzchołek
+            while (ile_sasiadow(G, trail[1]) != 1)
+            {
+                if (G->w[trail[1]][0] != trail[0])
+                {
+                    if (!zerwanie_polaczenia(G, trail[1], G->w[trail[1]][0]))
+                        return ERROR_ALLOC_NODE_LIST;
+                }
+                else
+                {
+                    if (!zerwanie_polaczenia(G, trail[1], G->w[trail[1]][2]))
+                        return ERROR_ALLOC_NODE_LIST;
+                }
+            }
+        }
+    }
+    else
+    {
+        // Sprawdzanie połączeń
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < ile_sasiadow(G, trail[i]); j++)
+            {
+                if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) // Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
+                    if(!zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
+                        return ERROR_ALLOC_NODE_LIST;
+                    else
+                        return 1;
+            }
+        }
+        // Jeśli wszystko dobrze, to tnij wzdłuż ścieżki
+        for (i = 0; i < n; i++)
+        {
+            j = 0;
+            while (j < ile_sasiadow(G, trail[i]))
+            {
+                // Tnie lewe albo dolne połączenie
+                if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i], trail[i] / G->x != G->y - 1, G) != -1)
+                {
+                    if (!zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
+                        return ERROR_ALLOC_NODE_LIST;
+                }
+                else
+                    j++;
+            }
+        }
+    }
+
+    free(trail);
+    return 1;
+}
+
+int zerwanie_polaczenia(graph_t *G, int q, int p)
+{
+    int x = szukaj_wierzcholek(q, p, G); // indeks wierzchołka P w liście Q
+    int y = szukaj_wierzcholek(p, q, G); // indeks wierzchołka Q w liście P
+    int countQ = ile_sasiadow(G, q);
+    int countP = ile_sasiadow(G, p);
+
+    if (x != -1)
+    {
+        for (int i = x + 2; i < 8; i++) // przesuwanie tablicy wierzchołka Q
+        {
+            G->w[q][i - 2] = G->w[q][i];
+
+            if (G->w[q][i] == -1)
+            {
+                G->w[q] = realloc(G->w[q], (i - 1) * sizeof *G->w[q]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
+                break;
+            }
+        }
+
+        if (countQ == 4) // jeżeli były cztery elementy, to -1 trzeba wstawic ręcznie
+        {
+            G->w[q][6] = -1;
+            G->w[q] = realloc(G->w[q], 7 * sizeof *G->w[q]);
+        }
+    }
+
+    if (y != -1)
+    {
+        for (int i = y + 2; i < 8; i++) // przesuwanie tablicy wierzchołka P
+        {
+            G->w[p][i - 2] = G->w[p][i];
+
+            if (G->w[p][i] == -1)
+            {
+                G->w[p] = realloc(G->w[p], (i - 1) * sizeof *G->w[p]); // -1 poleci na indeks (i-2) czyli jest (i-1) elementów
+                break;
+            }
+        }
+
+        if (countP == 4) // jeżeli były cztery elementy, to -1 trzeba wstawic ręcznie
+        {
+            G->w[p][6] = -1;
+            G->w[p] = realloc(G->w[p], 7 * sizeof *G->w[p]);
+        }
+    }
+
+    return (G->w[q] != NULL && G->w[p] != NULL);
+}
+
+int ile_sasiadow(graph_t *G, int edge)
+{
+    int n = 0;
+
+    while (n < 4 && G->w[edge][n * 2] != -1.0)
+        n++;
+
+    return n;
 }

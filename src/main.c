@@ -201,6 +201,13 @@ int main(int argc, char **argv)
 
             return ERROR_SUBGRAPH_OVER_NODE;
         }
+
+        if ((errnum = generuj_graf(gp)) != 1)
+        {
+            fprintf(stderr, "Wystąpił błąd podczas generowania grafu.\n");
+
+            return errnum;
+        }
     }
     // po wygenerowaniu grafu
 
