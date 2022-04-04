@@ -617,14 +617,15 @@ int generuj_graf(graph_t *G)
 
     if (G->n > 1) // dzielenie grafu jeżeli N > 1
     {
-        int ile = G->n - 1;
+        int ile = G->n;
+        wyznacz_n_siatki(G);
         int errnum;
 
-        while (ile)
+        while (ile > G->n)
             if ((errnum = dziel_graf(G)) != 1) // jeżeli dzielenie się nie powiodło, zwraca kod błędu
                 return errnum;
             else
-                ile--;
+                wyznacz_n_siatki(G);
     }
 
     return 1; // jeżeli wszystko poprawnie
@@ -650,9 +651,11 @@ double losuj(double min, double max)
 
 int dziel_graf(graph_t *G)
 {
-    int r, p;   // zmienne losowe
-    int n = 0;  // długość ścieżki
-    int *trail; // ścieżka punktów
+    int r, p; // zmienne losowe
+    int i, j;
+    int n = 0;     // długość ścieżki
+    int *trail;    // ścieżka punktów
+    int tmp, tmp2; // zmienne do przechowywania wartości wskaźnika, aby móc go wcześniej zwolnić
 
     if ((trail = malloc(G->x * G->y * sizeof *trail)) == NULL)
         return ERROR_ALLOC_TRAIL;
@@ -662,35 +665,38 @@ int dziel_graf(graph_t *G)
     while (ile_sasiadow(G, r) == 4 || ile_sasiadow(G, r) == 0);
 
     trail[n++] = r;
-    int i, j;
 
-    do
+    do // szukaj ścieżki, dopóki nie natrafisz na brzeg, wierzchołek ma mniej niż 4 wierzchołki
     {
         p = G->w[r][(int)losuj(0, ile_sasiadow(G, r)) * 2];
 
         for (i = 0; i < n; i++) // sprawdzanie, czy wierzchołek się nie powtórzył
-            if (trail[i] == p)
-                break;
+        {
+            if (trail[i] == p) // jeśli ścieżka się przecieła, generuj nową
+            {
+                free(trail);
+                return dziel_graf(G);
+            }
+        }
 
-        if (i == n) // Jeśli nie, dodaje
-        {
-            trail[n++] = p;
-            r = p;
-        }
-        else // Jeśli ścieżka się przecieła, generuj nową
-        {
-            free(trail);
-            return dziel_graf(G);
-        }
+        // jeśli nie, dodaje
+        trail[n++] = p;
+        r = p;
     } while (ile_sasiadow(G, r) == 4);
 
     if (n == 2)
     {                                                                   // Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
         if (ile_sasiadow(G, trail[0]) + ile_sasiadow(G, trail[1]) == 2) // Wierzchołki są połączone tylko ze sobą
-            if (!zerwanie_polaczenia(G, trail[0], trail[1]))
+        {
+            tmp = trail[0];
+            tmp2 = trail[1];
+            free(trail);
+
+            if (!zerwanie_polaczenia(G, tmp, tmp2))
                 return ERROR_ALLOC_NODE_LIST;
             else
                 return 1;
+        }
         else
         {
             // Sprawdzanie połączeń
@@ -699,10 +705,15 @@ int dziel_graf(graph_t *G)
                 for (j = 0; j < ile_sasiadow(G, trail[i]); j++)
                 {
                     if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) // Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                        if (!zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
+                    {
+                        tmp = trail[i];
+                        free(trail);
+
+                        if (!zerwanie_polaczenia(G, tmp, G->w[tmp][j * 2]))
                             return ERROR_ALLOC_NODE_LIST;
                         else
                             return 1;
+                    }
                 }
             }
 
@@ -739,18 +750,6 @@ int dziel_graf(graph_t *G)
     }
     else
     {
-        // Sprawdzanie połączeń
-        for (i = 0; i < n; i++)
-        {
-            for (j = 0; j < ile_sasiadow(G, trail[i]); j++)
-            {
-                if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) // Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                    if(!zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
-                        return ERROR_ALLOC_NODE_LIST;
-                    else
-                        return 1;
-            }
-        }
         // Jeśli wszystko dobrze, to tnij wzdłuż ścieżki
         for (i = 0; i < n; i++)
         {
