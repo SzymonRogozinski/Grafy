@@ -4,8 +4,70 @@
 #include <time.h>
 
 #include "graf.h"
+#include "queue.h"
+#include "errors.h"
 
 #define MAX_LENGTH 128
+#define LIST_EDGE -1
+
+void wyznacz_n_siatki(graph_t* gp)
+{
+    int* czy_odwiedzono = calloc(gp->x * gp->y, sizeof * czy_odwiedzono); // czy odwiedzono wierzchołek podczas BFS (0 - nie, 1 - tak)
+
+    if (czy_odwiedzono == NULL)
+    {
+        fprintf(stderr, "Nie udało się zaalokować pamięci na tablicę odwiedzonych wierzchołków. Przerywam działanie.\n");
+
+        exit(ERROR_ALLOC_VISITED);
+    }
+
+    queue_t* kolejka = zainicjalizuj_kolejke(gp->x * gp->y);
+    int w = 0; // wierzchołek od którego zaczynamy szukać
+    gp->n = 0;
+    int czy_szukac = 1; // czy są jeszcze jakieś nieodwiedzone wierzchołki
+    int tmp;
+
+    while (czy_szukac)
+    {
+        czy_szukac = 0;
+        gp->n++;
+
+        dodaj_element(kolejka, w);
+        czy_odwiedzono[w] = 1;
+
+        while (!czy_pusta(kolejka)) // wykonuj, dopóki w kolejce są elementy
+        {
+            tmp = usun_element(kolejka);
+
+            for (int i = 0; i < 8; i += 2)
+            {
+                if (gp->w[tmp][i] == LIST_EDGE)
+                    break;
+
+                if (!czy_odwiedzono[(int)gp->w[tmp][i]])
+                {
+                    dodaj_element(kolejka, (int)gp->w[tmp][i]);
+
+                    czy_odwiedzono[(int)gp->w[tmp][i]] = 1;
+                }
+            }
+        }
+
+        for (int i = 0; i < gp->x * gp->y; i++)
+        {
+            if (!czy_odwiedzono[i])
+            {
+                czy_szukac = 1;
+                w = i;
+                break;
+            }
+        }
+    }
+
+    free(czy_odwiedzono);
+    free(kolejka->queue);
+    free(kolejka);
+}
 
 int czy_sasiaduja(int w1, int w2, int w, int k)
 {
@@ -316,16 +378,17 @@ int sprawdz_integralnosc(graph_t *gp)
 
 int generuj_graf(graph_t* G) {
     srand(time(NULL));
+    int position;
+    int i,ile;
     if (G->w == NULL)
         return 1;
-    for (int i = 0; i < G->x * G->y;i++) {
-        G->w[i] = malloc(8 * sizeof * G->w[i]);
-        if (G->w[i] == NULL)
+    //Alokowanie pamięci
+    for (i = 0; i < G->x * G->y;i++) {
+        if ((G->w[i] = malloc(8 * sizeof * G->w[i])) == NULL)
             return 1;
     }
     //Zapisywanie sąsiadów
-    int position;
-    for (int i = 0; i < G->x * G->y; i++) {
+    for (i = 0; i < G->x * G->y; i++) {
         position = 0;
         if (i>=G->x) { //Czy ma nad sobą sąsiada
             G->w[i][position] = i - G->x;
@@ -350,7 +413,7 @@ int generuj_graf(graph_t* G) {
         }
     }
     //Zapisywanie wag
-    for (int i = 0; i < G->x * G->y; i++) {
+    for (i = 0; i < G->x * G->y; i++) {
         position = 1;
         if (i >= G->x) { //Czy ma nad sobą sąsiada |Przepisuje|
             G->w[i][position] = G->w[i - G->x][szukaj_wierzcholek(i - G->x,i,G)+1];
@@ -370,20 +433,21 @@ int generuj_graf(graph_t* G) {
        
     }
     if (G->n > 1) { //Sprawdzanie czy jest więcej niż jeden graf
-        int ile = G->n-1;
-        while (ile)
+        ile = G->n;
+        wyznacz_n_siatki(G);
+        while (ile>G->n)
             if (!dziel_graf(G))
                 return 1;
             else
-                ile--;
+                wyznacz_n_siatki(G);
     }
     return 0; //Jeśli wszystko poprawne
 }
 
-//Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka
+//Szuka wierzchołka w tablicy sąsiedztwa innego wierzchołka, zwraca pozycje lub -1 jeśli poza zakresem lub błąd
 int szukaj_wierzcholek(int edge,int seek,graph_t *G) {
     int i = 0;
-    if (seek < 0)
+    if (seek < 0 || edge <0)
         return -1;
     while (G->w[edge][i]!=(double)seek && i<8)
         i += 2;
@@ -400,45 +464,49 @@ int dziel_graf(graph_t* G) {
     int r,p; //Zmienna losowa
     int size = 100; //Wielkość zaalokowanej pamięci
     int n = 0; //Długość ścieżki
-    int* trail;
+    int tmp,tmpp; //Zmienne do przechowywania wartości wskaźnika, aby móc go wcześniej zwolnić
+    int* trail; //Zapisanie ścieżki tnącej
+    int i;
+    int j;
     if((trail= malloc(size * sizeof * trail))==NULL)//ścieżka punktów
         return 0;
     do //Robi to dopóki, nie wylosuje wierzchołka, który nie ma 4 sąsiadów, ale ma chociaż jednego
         r = ((int)losuj(0,G->y))*(G->x) + ((int)losuj(0, G->x)); //Losowanie z całego zakresu wierzchołków
     while (ile_sasiadow(G,r)==4 || ile_sasiadow(G, r) == 0);
     trail[n++] = r;
-    int i;
-    int j;
-    do {
+    do { //Szukaj ścieżki, dopóki nie natrafisz na brzeg, wierzchołek ma mniej niż 4 wierzchołki
         p = G->w[r][(int)losuj(0, ile_sasiadow(G,r))*2];
         //sprawdzanie, czy wierzchołek się nie powtórzył
         for(i=0;i<n;i++)
-            if(trail[i]==p)
-                break;
-        //Jeśli nie, dodaje
-        if (i == n){
-            trail[n++] = p;
-            r = p;
-            if (n == size) {
-                size *= 2;
-                if((trail = realloc(trail,size * sizeof * trail))==NULL)
-                    return 0; //Błąd
+            if (trail[i] == p) { //Jeśli ścieżka się przecieła, generuj nową
+                free(trail);
+                return dziel_graf(G);
             }
+        //Jeśli nie, dodaje
+        trail[n++] = p;
+        r = p;
+        if (n == size) { //Powiększanie bufora, jeśli potrzeba
+            size *= 2;
+            if ((trail = realloc(trail, size * sizeof * trail)) == NULL)
+                return 0; //Błąd
         }
-        else {//Jeśli ścieżka się przecieła, generuj nową
-            free(trail);
-            return dziel_graf(G);
-        }
+       
     } while (ile_sasiadow(G, r) == 4);
     if (n == 2) { //Jeśli są tylko dwa wierzchołki, czyli pętla skończyła działanie po jednym wykonaniu
-        if (ile_sasiadow(G, trail[0]) + ile_sasiadow(G, trail[1]) == 2) //Wierzchołki są połączone tylko ze sobą
-            return !zerwanie_polaczenia(G, trail[0], trail[1]);
+        if (ile_sasiadow(G, trail[0]) + ile_sasiadow(G, trail[1]) == 2) { //Wierzchołki są połączone tylko ze sobą
+            tmp = trail[0];
+            tmpp = trail[1];
+            return !zerwanie_polaczenia(G, tmp, tmpp);
+        }
         else {
             //Sprawdzanie połączeń
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < ile_sasiadow(G, trail[i]); j++) {
-                    if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                        return !zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
+                    if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) { //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
+                        tmp = trail[i];
+                        free(trail);
+                        return !zerwanie_polaczenia(G, tmp, G->w[tmp][j * 2]);
+                    }
                 }
             }
             //Oderwanie tych dwóch wierzchołków nie spowoduje podzielenia grafu na więcej niż 2, odrywam połączenia zewnętrzne
@@ -467,30 +535,22 @@ int dziel_graf(graph_t* G) {
         }
     }
     else{
-        //Sprawdzanie połączeń
-        for (i = 0; i < n; i++) {
-            for (j = 0; j < ile_sasiadow(G, trail[i]); j++) {
-                if (ile_sasiadow(G, G->w[trail[i]][j * 2]) == 1) //Czy jeden z wierzchołków jest jedynym połączeniem z jakimś wierzchołkiem
-                    return !zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]);
-            }
-        }
         //Jeśli wszystko dobrze, to tnij wzdłuż ścieżki
         for (i = 0;i<n;i++) {
             j = 0;
             while (j<ile_sasiadow(G,trail[i])) {
                 //Tnie lewe albo dolne połączenie
-                if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i], trail[i] / G->x != G->y - 1, G) != -1){
-                    if (zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2]))
+                if (szukaj_wierzcholek(trail[i], i % G->x != 0, G) != -1 || szukaj_wierzcholek(trail[i], trail[i] / G->x != G->y - 1, G) != -1) {
+                    if (zerwanie_polaczenia(G, trail[i], G->w[trail[i]][j * 2])) {
+                        free(trail);
                         return 0;
+                    }
                 }
                 else
                     j++;
             }
         }
     }
-    for(i=0;i<n;i++)
-        printf("%d ",trail[i]);
-    printf("\n");
     free(trail);
     return 1;
 }

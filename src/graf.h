@@ -24,5 +24,5 @@ double losuj(double,double);		//Losuje liczbę z podanego zakresu
 int dziel_graf(graph_t*);			//Funkcja dzieląca jeden graf na dwa
 int ile_sasiadow(graph_t*, int); //Liczy ile sąsiadów ma wierzchołek
 int zerwanie_polaczenia(graph_t*, int, int); //Zrywa połączenie między dwoma punktami. Zwraca 1 jeśli sukces
-
+void wyznacz_n_siatki(graph_t*);
 #endif
