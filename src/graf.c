@@ -47,15 +47,15 @@ int wczytaj_graf(FILE *inf, graph_t *gp)
         return ERROR_READ_DIMENSIONS;
     }
 
-    if (gp->y <= 0 || gp->x <= 0) // warunek X > 0, Y > 0
+    if (gp->y <= 0 || gp->x <= 0 || gp->x > 500 || gp->y > 500) // warunek 500 >= X > 0, 500 >= Y > 0
     {
-        if (gp->y <= 0)
-            fprintf(stderr, "Liczba wierszy musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", gp->y);
+        if (gp->y <= 0 || gp->y > 500)
+            fprintf(stderr, "Liczba wierszy musi należeć do zakresu (0;500> – wczytano “%d”. Przerywam działanie.\n", gp->y);
 
-        if (gp->x <= 0)
-            fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", gp->x);
+        if (gp->x <= 0 || gp->x > 500)
+            fprintf(stderr, "Liczba kolumn musi należeć do zakresu (0;500> – wczytano “%d”. Przerywam działanie.\n", gp->x);
 
-        return ERROR_NEG_DIMENSIONS;
+        return ERROR_BAD_DIMENSIONS;
     }
 
     if ((gp->w = malloc(gp->y * gp->x * sizeof *gp->w)) == NULL) // alokowanie pamięci na wierzchołki

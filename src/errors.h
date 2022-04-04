@@ -20,8 +20,8 @@
 
 #define ERROR_NEG_PATH_NODES -20       // ujemne indeksy wierzchołków ścieżki
 #define ERROR_BAD_WEIGHT_RANGE -21     // zakres wartości wag nie spełnia kryteriów
-#define ERROR_NEG_COLUMN -22           // ujemna liczba kolumn
-#define ERROR_NEG_ROW -23              // ujemna liczba wierszy
+#define ERROR_BAD_COLUMN -22           // liczba kolumn poza zakresem
+#define ERROR_BAD_ROW -23              // liczba wierszy poza zakresem
 #define ERROR_NEG_SUBGRAPH -24         // ujemna liczba grafów w siatce
 #define ERROR_UNDEFINED_PATH_NODES -25 // nie zdefiniowano wierzchołków ścieżki
 #define ERROR_SUBGRAPH_OVER_NODE -26   // podano liczbę grafów w siatce większą od liczby wierzchołków
@@ -31,7 +31,7 @@
 #define ERROR_GRAPH_INTEGRITY -31   // połączenia w grafie nie są integralne
 
 #define ERROR_READ_DIMENSIONS -40 // nie udało się wczytać wymiarów grafu z pliku
-#define ERROR_NEG_DIMENSIONS -41  // wczytano z pliku ujemne wymiary grafu
+#define ERROR_BAD_DIMENSIONS -41  // wczytano z pliku wymiary grafu spoza zakresu
 #define ERROR_ALLOC_NODE_LIST -42 // błąd alokacji pamięci na listę sąsiedztwa dla wierzchołka
 #define ERROR_READ_LIST -43       // nie udało się wczytać listy dla wierzchołka
 #define ERROR_BAD_LIST_FORMAT -44 // zły format listy sąsiedztwa dla wierzchołka
