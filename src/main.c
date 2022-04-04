@@ -80,10 +80,10 @@ int main(int argc, char **argv)
             byParam = 1;
             gp->x = atoi(optarg);
 
-            if (gp->x <= 0)
+            if (gp->x <= 0 || gp->x > 500)
             {
-                fprintf(stderr, "Liczba kolumn musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
-                return ERROR_NEG_COLUMN;
+                fprintf(stderr, "Liczba kolumn musi należeć do zakresu (0;500> – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
+                return ERROR_BAD_COLUMN;
             }
 
             break;
@@ -91,10 +91,10 @@ int main(int argc, char **argv)
             byParam = 1;
             gp->y = atoi(optarg);
 
-            if (gp->y <= 0)
+            if (gp->y <= 0 || gp->y > 500)
             {
-                fprintf(stderr, "Liczba wierszy musi być większa od zera – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
-                return ERROR_NEG_ROW;
+                fprintf(stderr, "Liczba wierszy musi należeć do zakresu (0;500> – wczytano “%d”. Przerywam działanie.\n", atoi(optarg));
+                return ERROR_BAD_ROW;
             }
 
             break;
